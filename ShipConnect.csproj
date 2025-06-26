@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="14.0.0" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.17" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.17" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.17" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.17">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DTOs\AccountDTOs\" />
+    <Folder Include="DTOs\TrackingDTOs\" />
+    <Folder Include="DTOs\StartUpDTOs\" />
+    <Folder Include="DTOs\ShippingCompanyDTOs\" />
+    <Folder Include="DTOs\ReceivderDTOs\" />
+    <Folder Include="DTOs\OfferDTOs\" />
+    <Folder Include="Features\Offer\Commands\" />
+    <Folder Include="Features\Offer\Queries\" />
+    <Folder Include="Features\Shipment\Commands\" />
+    <Folder Include="Features\Shipment\Queries\" />
+    <Folder Include="Features\ShippingCompany\Commands\" />
+    <Folder Include="Features\ShippingCompany\Queries\" />
+    <Folder Include="Features\StartUp\Commands\" />
+    <Folder Include="Features\StartUp\Queries\" />
+    <Folder Include="Features\Tracking\Commands\" />
+    <Folder Include="Features\Tracking\Queries\" />
+  </ItemGroup>
+
+</Project>
