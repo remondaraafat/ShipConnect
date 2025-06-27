@@ -31,8 +31,6 @@
     <Folder Include="CQRS\Offers\Queries\" />
     <Folder Include="CQRS\Shipments\Commands\" />
     <Folder Include="CQRS\Shipments\Queries\" />
-    <Folder Include="CQRS\ShippingCompanies\Commands\" />
-    <Folder Include="CQRS\ShippingCompanies\Queries\" />
     <Folder Include="CQRS\StartUps\Queries\" />
     <Folder Include="CQRS\Tracking\Commands\" />
     <Folder Include="CQRS\Tracking\Queries\" />
