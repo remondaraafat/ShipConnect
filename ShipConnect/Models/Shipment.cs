@@ -26,22 +26,20 @@ namespace ShipConnect.Models
         
         public int StartupId { get; set; }
         public int ReceiverId { get; set; }
-        public int? ShippingCompanyId { get; set; }
-
-
-        [ForeignKey("StartupId")]
-        public StartUp? Startup { get; set; }
 
         [ForeignKey("ReceiverId")]
         public Receiver? Receiver { get; set; }
 
-        [ForeignKey("ShippingCompanyId")]
-        public ShippingCompany? ShippingCompany { get; set; }
+        
 
         public ICollection<Tracking> Trackings { get; set; }
         public ICollection<Offer> Offers { get; set; }
         public ICollection<ChatMessage> ChatMessages { get; set; }
-        public ICollection<Rating> Ratings { get; set; }
+        
         public ICollection<Payment> Payments { get; set; }
+        // reviewed
+        [ForeignKey("StartupId")]
+        public StartUp? Startup { get; set; }
+
     }
 }

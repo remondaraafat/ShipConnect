@@ -42,50 +42,32 @@ namespace ShipConnect.Data
                 }
             }
 
-            // Composite Key: Prevent duplicate rating
-            modelBuilder.Entity<Rating>()
-                .HasIndex(r => new { r.UserId, r.RatedUserId, r.ShipmentId })
-                .IsUnique();
+            modelBuilder.Entity<Payment>()
+            .HasOne(p => p.SenderBankAccount)
+            .WithMany(b => b.PaymentsSent)
+            .HasForeignKey(p => p.SenderBankAccountId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.ReceiverBankAccount)
+                .WithMany(b => b.PaymentsReceived)
+                .HasForeignKey(p => p.ReceiverBankAccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
             // One-to-one relationship: ApplicationUser <--> StartUp
             modelBuilder.Entity<ApplicationUser>()
-                .HasOne(u => u.StartupProfile)
+                .HasOne(u => u.Startup)
                 .WithOne(s => s.User)
                 .HasForeignKey<StartUp>(s => s.UserId)
                 .HasPrincipalKey<ApplicationUser>(u => u.Id);
 
             // One-to-one relationship: ApplicationUser <--> ShippingCompany
             modelBuilder.Entity<ApplicationUser>()
-                .HasOne(u => u.ShippingCompanyProfile)
+                .HasOne(u => u.ShippingCompany)
                 .WithOne(c => c.User)
                 .HasForeignKey<ShippingCompany>(c => c.UserId)
                 .HasPrincipalKey<ApplicationUser>(u => u.Id);
-
-            // Prevent cascading delete in Rating
-            modelBuilder.Entity<Rating>()
-                .HasOne(r => r.User)
-                .WithMany(u => u.User)
-                .HasForeignKey(r => r.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Rating>()
-                .HasOne(r => r.RatedUser)
-                .WithMany(u => u.RatedUser)
-                .HasForeignKey(r => r.RatedUserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Optional: Prevent cascading delete between BankAccount and both StartUp & ShippingCompany
-            modelBuilder.Entity<BankAccount>()
-                .HasOne(b => b.ShippingCompany)
-                .WithMany(c => c.BankAccounts)
-                .HasForeignKey(b => b.ShippingCompanyId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<BankAccount>()
-                .HasOne(b => b.StartUp)
-                .WithMany(s => s.BankAccount)
-                .HasForeignKey(b => b.StartUpId)
-                .OnDelete(DeleteBehavior.Restrict);
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

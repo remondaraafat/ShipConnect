@@ -21,12 +21,15 @@ namespace ShipConnect.Models
         public ShippingScope ShippingScope { get; set; }
         public string? TaxId { get; set; }
 
+        // edited and reviewd
         [ForeignKey("UserId")]
         public ApplicationUser User { get; set; }
-        public ICollection<Shipment> ShipmentsHandled { get; set; } = new List<Shipment>();
-        public ICollection<ChatMessage> SentMessages { get; set; } = new List<ChatMessage>();
-        public ICollection<BankAccount> BankAccounts { get; set; } = new List<BankAccount>();
-        public ICollection<Payment> PaymentsReceived { get; set; } = new List<Payment>();
-        public ICollection<Offer> ShippingOffers { get; set; }       
+        
+        //public ICollection<BankAccount> BankAccounts { get; set; }
+
+        public ICollection<Offer> ShippingOffers { get; set; }
+        //public ICollection<ChatMessage> SentMessages { get; set; } 
+        public ICollection<Tracking> Trackings { get; set; }
+        public ICollection<Rating> Ratings { get; set; } 
     }
 }

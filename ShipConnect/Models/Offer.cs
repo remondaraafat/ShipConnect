@@ -21,6 +21,7 @@ namespace ShipConnect.Models
 
         [ForeignKey("ShippingCompanyId")]
         public ShippingCompany? ShippingCompany { get; set; }
-
+        // edit
+        public Rating Ratings { get; set; } 
     }
 }
