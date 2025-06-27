@@ -13,24 +13,28 @@ namespace ShipConnect.Models
         public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
         public string? Currency { get; set; } = "EGP";
         public string? Notes { get; set; }
-        public string PayerId { get; set; }
-        public string PayeeId { get; set; }
-        public int ShipmentId { get; set; }
-        public int ShippingOfferId { get; set; }
+        //public string PayerId { get; set; }
+        //public string PayeeId { get; set; }
+        //public int ShipmentId { get; set; }
+        public int OfferId { get; set; }
         public bool IsConfirmed { get; set; } //في عملية تأكيد يدوي من الطرف المستلم.
 
-        [ForeignKey(nameof(PayerId))]
-        [InverseProperty(nameof(ApplicationUser.PaymentsMade))]
-        public ApplicationUser Payer { get; set; }  // اللي دفع
+        public int SenderBankAccountId { get; set; }
+        [ForeignKey(nameof(SenderBankAccountId))]
+        public BankAccount SenderBankAccount { get; set; }
+        public int ReceiverBankAccountId { get; set; }
 
-        [ForeignKey(nameof(PayeeId))]
-        [InverseProperty(nameof(ApplicationUser.PaymentsReceived))]
-        public ApplicationUser Payee { get; set; }  // اللي استلم الفلوس
+        [ForeignKey(nameof(ReceiverBankAccountId))]
+        public BankAccount ReceiverBankAccount { get; set; }
+        //[ForeignKey(nameof(PayerId))]
+        //[InverseProperty(nameof(ApplicationUser.PaymentsMade))]
+        //public ApplicationUser Payer { get; set; }  // اللي دفع
 
-        [ForeignKey(nameof(ShipmentId))]
-        public Shipment? Shipment { get; set; }
+        //[ForeignKey(nameof(PayeeId))]
+        //[InverseProperty(nameof(ApplicationUser.PaymentsReceived))]
+        //public ApplicationUser Payee { get; set; }  // اللي استلم الفلوس
 
-        [ForeignKey(nameof(ShippingOfferId))]
-        public Offer ShippingOffer { get; set; }
+        //[ForeignKey(nameof(ShipmentId))]
+        //public Shipment? Shipment { get; set; }
     }
 }

@@ -11,22 +11,24 @@ namespace ShipConnect.Models
         public string? Description { get; set; }
         public string? City { get; set; }
         public string Address { get; set; } = string.Empty;
+        public string? Website { get; set; }
         [Phone]
         public string Phone { get; set; } = string.Empty;
-        [StringLength(100)]
-        public string? Website { get; set; }
         public string? LicenseNumber { get; set; }
         public string UserId { get; set; }
         public TransportType TransportType { get; set; }
         public ShippingScope ShippingScope { get; set; }
         public string? TaxId { get; set; }
 
+        // edited and reviewd
         [ForeignKey("UserId")]
         public ApplicationUser User { get; set; }
-        public ICollection<Shipment> ShipmentsHandled { get; set; } = new List<Shipment>();
-        public ICollection<ChatMessage> SentMessages { get; set; } = new List<ChatMessage>();
-        public ICollection<BankAccount> BankAccounts { get; set; } = new List<BankAccount>();
-        public ICollection<Payment> PaymentsReceived { get; set; } = new List<Payment>();
-        public ICollection<Offer> ShippingOffers { get; set; }       
+        
+        //public ICollection<BankAccount> BankAccounts { get; set; }
+
+        public ICollection<Offer> ShippingOffers { get; set; }
+        //public ICollection<ChatMessage> SentMessages { get; set; } 
+        public ICollection<Tracking> Trackings { get; set; }
+        public ICollection<Rating> Ratings { get; set; } 
     }
 }
