@@ -12,8 +12,6 @@ namespace ShipConnect.Models
         public string? Location { get; set; }
         public int ShipmentId { get; set; }
 
-
-
         [ForeignKey("ShipmentId")]
         public Shipment Shipment { get; set; }
     }

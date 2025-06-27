@@ -13,15 +13,17 @@ namespace ShipConnect.Models
         public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
         public string? Currency { get; set; } = "EGP";
         public string? Notes { get; set; }
-        public int PayerId { get; set; }
-        public int PayeeId { get; set; }
+        public string PayerId { get; set; }
+        public string PayeeId { get; set; }
         public int ShipmentId { get; set; }
         public int ShippingOfferId { get; set; }
 
         [ForeignKey(nameof(PayerId))]
+        [InverseProperty(nameof(ApplicationUser.PaymentsMade))]
         public ApplicationUser Payer { get; set; }  // اللي دفع
 
         [ForeignKey(nameof(PayeeId))]
+        [InverseProperty(nameof(ApplicationUser.PaymentsReceived))]
         public ApplicationUser Payee { get; set; }  // اللي استلم الفلوس
 
         [ForeignKey(nameof(ShipmentId))]

@@ -13,7 +13,7 @@ namespace ShipConnect.Models
         public string Message { get; set; } = string.Empty;
         public bool IsRead { get; set; } = false;
         public NotificationType Type { get; set; } = NotificationType.General;
-        public int RecipientId { get; set; }
+        public string RecipientId { get; set; }
 
         [ForeignKey(nameof(RecipientId))]
         public ApplicationUser Recipient { get; set; }        // اللي هيوصله الإشعار

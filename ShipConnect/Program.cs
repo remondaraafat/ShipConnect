@@ -23,6 +23,7 @@ namespace ShipConnect
             builder.Services.AddControllers();
 
             #region DbContext & Identity
+
             builder.Services.AddDbContext<ShipConnectContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("ShipConnect"));

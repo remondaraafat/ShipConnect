@@ -12,15 +12,21 @@ namespace ShipConnect.Models
         public StartUp? StartupProfile { get; set; }
         public ShippingCompany? ShippingCompanyProfile { get; set; }
 
-        [InverseProperty("User")]
+        [InverseProperty(nameof(Rating.User))]
         public ICollection<Rating> User { get; set; } = new List<Rating>();// اللي عمل التقييم
-        [InverseProperty("RatedUser")]
+        [InverseProperty(nameof(Rating.RatedUser))]
         public ICollection<Rating> RatedUser { get; set; } = new List<Rating>();// اللي اتقيم
 
+        [InverseProperty(nameof(Payment.Payer))]
         public ICollection<Payment> PaymentsMade { get; set; } = new List<Payment>();
+
+        [InverseProperty(nameof(Payment.Payee))]
         public ICollection<Payment> PaymentsReceived { get; set; } = new List<Payment>();
 
+        [InverseProperty(nameof(ChatMessage.Sender))]
         public ICollection<ChatMessage> SentMessages { get; set; } = new List<ChatMessage>();
+
+        [InverseProperty(nameof(ChatMessage.Receiver))]
         public ICollection<ChatMessage> ReceivedMessages { get; set; } = new List<ChatMessage>();
 
         public ICollection<Offer> Offers { get; set; } = new List<Offer>();

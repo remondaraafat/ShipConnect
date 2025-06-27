@@ -13,7 +13,7 @@ namespace ShipConnect.Models
         public string? Website { get; set; }
         public string? Industry { get; set; } //==BussinusCategoryx
         public string? TaxId { get; set; }
-        public int UserId { get; set; }
+        public string UserId { get; set; }
 
         [ForeignKey("UserId")]
         public ApplicationUser User { get; set; }

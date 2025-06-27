@@ -14,7 +14,7 @@ namespace ShipConnect.Models
         public string Phone { get; set; } = string.Empty;
         public string? Website { get; set; }
         public string? LicenseNumber { get; set; }
-        public int UserId { get; set; }
+        public string UserId { get; set; }
         public TransportType TransportType { get; set; }
         public ShippingScope ShippingScope { get; set; }
         public string? TaxId { get; set; }

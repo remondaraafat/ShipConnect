@@ -10,14 +10,16 @@ namespace ShipConnect.Models
         public string Content { get; set; } = string.Empty;
         public DateTime SentAt { get; set; }
         public bool IsRead { get; set; } = false;
-        public int SenderId { get; set; }
-        public int ReceiverId { get; set; }
+        public string SenderId { get; set; }
+        public string ReceiverId { get; set; }
         public int? ShipmentId { get; set; }
 
         [ForeignKey(nameof(SenderId))]
+        [InverseProperty(nameof(ApplicationUser.SentMessages))]
         public ApplicationUser Sender { get; set; }
 
         [ForeignKey(nameof(ReceiverId))]
+        [InverseProperty(nameof(ApplicationUser.ReceivedMessages))]
         public ApplicationUser Receiver { get; set; }
 
         [ForeignKey(nameof(ShipmentId))]

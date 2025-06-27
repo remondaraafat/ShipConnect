@@ -6,11 +6,8 @@ namespace ShipConnect.Models
 {
     public class Rating:BaseEntity
     {
-        [Key]
-        public int UserId { get; set; }                  
-        [Key]
-        public int RatedUserId { get; set; }             
-        [Key]
+        public string UserId { get; set; }                  
+        public string RatedUserId { get; set; }             
         public int ShipmentId { get; set; }
         [Required]
         [Range(1, 5)]
@@ -19,11 +16,11 @@ namespace ShipConnect.Models
         public string? Comment { get; set; }
         
         [ForeignKey("UserId")]
-        [InverseProperty("User")]
+        [InverseProperty(nameof(ApplicationUser.User))]
         public ApplicationUser User { get; set; }  // اللي عمل التقييم
 
         [ForeignKey("RatedUserId")]
-        [InverseProperty("RatedUser")]
+        [InverseProperty(nameof(ApplicationUser.RatedUser))]
         public virtual ApplicationUser RatedUser { get; set; } // اللي اتقيم
 
         [ForeignKey("ShipmentId")]
