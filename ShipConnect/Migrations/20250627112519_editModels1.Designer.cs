@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ShipConnect.Data;
 
@@ -11,9 +12,11 @@ using ShipConnect.Data;
 namespace ShipConnect.Migrations
 {
     [DbContext(typeof(ShipConnectContext))]
-    partial class ShipConnectContextModelSnapshot : ModelSnapshot
+    [Migration("20250627112519_editModels1")]
+    partial class editModels1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -274,7 +277,7 @@ namespace ShipConnect.Migrations
                     b.Property<bool>("IsPrimary")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("ShippingCompanyId")
+                    b.Property<int>("ShippingCompanyId")
                         .HasColumnType("int");
 
                     b.Property<int?>("StartUpId")
@@ -953,7 +956,8 @@ namespace ShipConnect.Migrations
                     b.HasOne("ShipConnect.Models.ShippingCompany", "ShippingCompany")
                         .WithMany("BankAccounts")
                         .HasForeignKey("ShippingCompanyId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("ShipConnect.Models.StartUp", "StartUp")
                         .WithMany("BankAccount")

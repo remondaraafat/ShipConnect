@@ -17,6 +17,7 @@ namespace ShipConnect.Models
         public string PayeeId { get; set; }
         public int ShipmentId { get; set; }
         public int ShippingOfferId { get; set; }
+        public bool IsConfirmed { get; set; } //في عملية تأكيد يدوي من الطرف المستلم.
 
         [ForeignKey(nameof(PayerId))]
         [InverseProperty(nameof(ApplicationUser.PaymentsMade))]

@@ -6,10 +6,13 @@ namespace ShipConnect.Models
     public class StartUp:BaseEntity
     {
         [Required]
+        [StringLength(100)]
         public string CompanyName { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string? Address { get; set; }
+        [Phone]
         public string? Phone { get; set; }
+        [StringLength(100)]
         public string? Website { get; set; }
         public string? Industry { get; set; } //==BussinusCategoryx
         public string? TaxId { get; set; }
