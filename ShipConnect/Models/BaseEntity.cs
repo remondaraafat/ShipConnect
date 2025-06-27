@@ -9,11 +9,17 @@ namespace ShipConnect.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-
         public bool IsDeleted { get; set; } = false;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        [DataType(DataType.DateTime)]
+        public DateTime CreatedAt { get; set; }
 
+        [DataType(DataType.DateTime)]
         public DateTime? UpdatedAt { get; set; }
+
+        [DataType(DataType.DateTime)]
+        public DateTime? DeletedAt { get; set; }
+
+ 
     }
 }

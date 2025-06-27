@@ -10,11 +10,16 @@ namespace ShipConnect.Data
     {
         public ShipConnectContext(DbContextOptions<ShipConnectContext> options) : base(options) { }
 
-        public DbSet<StartUp> StartUps { get; set; }
-        public DbSet<ShippingCompany> ShippingCompanies { get; set; }
-        public DbSet<Shipment> Shipments { get; set; }
-        public DbSet<Receiver> Receivers { get; set; }
+        public DbSet<BankAccount> BankAccounts { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
+        public DbSet<Notification> Notifications { get; set; }  
         public DbSet<Offer> Offers { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<Rating> Ratings { get; set; }
+        public DbSet<Receiver> Receivers { get; set; }
+        public DbSet<Shipment> Shipments { get; set; }
+        public DbSet<ShippingCompany> ShippingCompanies { get; set; }
+        public DbSet<StartUp> StartUps { get; set; }
         public DbSet<Tracking> Trackings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -38,6 +43,39 @@ namespace ShipConnect.Data
                     modelBuilder.Entity(clrType).HasQueryFilter(lambda);
                 }
             }
+
+            #region Rating Composite Key
+            modelBuilder.Entity<Rating>()
+                .HasIndex(r => new { r.UserId, r.RatedUserId, r.ShipmentId })
+                .IsUnique();
+
+            base.OnModelCreating(modelBuilder);
+
+            #endregion
+            
+            #region One-to-one relationships
+            modelBuilder.Entity<ApplicationUser>()
+        .HasOne(u => u.StartupProfile)
+        .WithOne(s => s.User)
+        .HasForeignKey<StartUp>(s => s.UserId);
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasOne(u => u.ShippingCompanyProfile)
+                .WithOne(c => c.User)
+                .HasForeignKey<ShippingCompany>(c => c.UserId);
+
+            modelBuilder.Entity<Rating>()
+                .HasOne(r => r.User)
+                .WithMany(u => u.User)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Rating>()
+                .HasOne(r => r.RatedUser)
+                .WithMany(u => u.RatedUser)
+                .HasForeignKey(r => r.RatedUserId)
+                .OnDelete(DeleteBehavior.Restrict); 
+            #endregion
         }
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
@@ -55,6 +93,11 @@ namespace ShipConnect.Data
                 if (entry.State == EntityState.Added)
                 {
                     entity.CreatedAt = DateTime.UtcNow;
+                }
+
+                if (entry.State == EntityState.Deleted)
+                {
+                    entity.DeletedAt = DateTime.UtcNow;
                 }
             }
 

@@ -1,6 +1,9 @@
 ﻿
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ShipConnect.Data;
 using ShipConnect.Models;
 using ShipConnect.Repository;
@@ -25,9 +28,28 @@ namespace ShipConnect
                 options.UseSqlServer(builder.Configuration.GetConnectionString("ShipConnect"));
             });
 
+            //register 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ShipConnectContext>()
-                .AddDefaultTokenProviders();
+                .AddEntityFrameworkStores<ShipConnectContext>();
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme=JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme=JwtBearerDefaults.AuthenticationScheme;//unauth
+                options.DefaultScheme=JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>//verified key
+            {
+                options.SaveToken = true;
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = builder.Configuration["JWT:IssuerIP"],
+                    ValidateAudience = true,
+                    ValidAudience = builder.Configuration["JWT:AudienceIP"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecritKey"]))
+                };
+            });
             #endregion
 
             #region CORS
@@ -51,6 +73,8 @@ namespace ShipConnect
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            builder.Services.AddMediatR(options =>
+            options.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
             var app = builder.Build();
 
@@ -65,7 +89,7 @@ namespace ShipConnect
 
             app.UseCors("AllowReactApp");
 
-            app.UseAuthentication();
+            
             app.UseAuthorization();
 
 

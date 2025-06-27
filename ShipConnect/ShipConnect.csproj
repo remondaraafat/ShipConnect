@@ -9,7 +9,9 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+    <PackageReference Include="MediatR" Version="12.5.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.17" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.17" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.17" />
@@ -21,22 +23,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DTOs\AccountDTOs\" />
     <Folder Include="DTOs\TrackingDTOs\" />
-    <Folder Include="DTOs\StartUpDTOs\" />
     <Folder Include="DTOs\ShippingCompanyDTOs\" />
     <Folder Include="DTOs\ReceivderDTOs\" />
     <Folder Include="DTOs\OfferDTOs\" />
-    <Folder Include="Features\Offer\Commands\" />
-    <Folder Include="Features\Offer\Queries\" />
-    <Folder Include="Features\Shipment\Commands\" />
-    <Folder Include="Features\Shipment\Queries\" />
-    <Folder Include="Features\ShippingCompany\Commands\" />
-    <Folder Include="Features\ShippingCompany\Queries\" />
-    <Folder Include="Features\StartUp\Commands\" />
-    <Folder Include="Features\StartUp\Queries\" />
-    <Folder Include="Features\Tracking\Commands\" />
-    <Folder Include="Features\Tracking\Queries\" />
+    <Folder Include="CQRS\Offers\Commands\" />
+    <Folder Include="CQRS\Offers\Queries\" />
+    <Folder Include="CQRS\Shipments\Commands\" />
+    <Folder Include="CQRS\Shipments\Queries\" />
+    <Folder Include="CQRS\ShippingCompanies\Commands\" />
+    <Folder Include="CQRS\ShippingCompanies\Queries\" />
+    <Folder Include="CQRS\StartUps\Queries\" />
+    <Folder Include="CQRS\Tracking\Commands\" />
+    <Folder Include="CQRS\Tracking\Queries\" />
   </ItemGroup>
 
 </Project>
