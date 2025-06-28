@@ -4,10 +4,10 @@ using ShipConnect.UnitOfWorkContract;
 
 namespace ShipConnect.Features.StartUps.Commands
 {
-    public class GetStartUpQuery:IRequest<StartUpDTO>
-    {
+    //public class GetStartUpQuery:IRequest<StartUpDTO>
+    //{
         
-    }
+    //}
 
     //public class GetStartUpQueryHandler : IRequestHandler<GetStartUpQuery, StartUpDTO>
     //{

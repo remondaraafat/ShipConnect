@@ -11,10 +11,9 @@ namespace ShipConnect.Models
         public string? Description { get; set; }
         public string? City { get; set; }
         public string Address { get; set; } = string.Empty;
+        public string? Website { get; set; }
         [Phone]
         public string Phone { get; set; } = string.Empty;
-        [StringLength(100)]
-        public string? Website { get; set; }
         public string? LicenseNumber { get; set; }
         public string UserId { get; set; }
         public TransportType TransportType { get; set; }
