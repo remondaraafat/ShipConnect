@@ -11,6 +11,9 @@ namespace ShipConnect.UnitOfWorkContract
         IStartUpRepository StartUpRepository { get; }
         ITrackingRepository TrackingRepository { get; }
 
+        IRatingRepository RatingRepository { get; }
+
+
         Task SaveAsync();
     }
 }

@@ -23,8 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="CQRS\Offers\Commands\" />
-    <Folder Include="CQRS\Offers\Queries\" />
     <Folder Include="CQRS\Register\Queries\" />
     <Folder Include="CQRS\Shipments\Commands\" />
     <Folder Include="CQRS\Shipments\Queries\" />
@@ -34,7 +32,6 @@
     <Folder Include="DTOs\TrackingDTOs\" />
     <Folder Include="DTOs\ShippingCompanyDTOs\" />
     <Folder Include="DTOs\ReceivderDTOs\" />
-    <Folder Include="DTOs\OfferDTOs\" />
   </ItemGroup>
 
 </Project>

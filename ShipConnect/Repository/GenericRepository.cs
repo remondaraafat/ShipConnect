@@ -26,7 +26,7 @@ namespace ShipConnect.Repository
             return entity;
         }
 
-        public async Task<IQueryable<T>> GetAllAsync()
+        public Task<IQueryable<T>> GetAllAsync()
         {
             IQueryable<T> query = _dbSet;
 
@@ -35,10 +35,10 @@ namespace ShipConnect.Repository
                 query = query.Where(e => EF.Property<bool>(e, "IsDeleted") == false);
             }
 
-            return await Task.FromResult(query);
+            return Task.FromResult(query);
         }
 
-        public async Task<IQueryable<T>> GetWithFilterAsync(Expression<Func<T, bool>> predicate)
+        public Task<IQueryable<T>> GetWithFilterAsync(Expression<Func<T, bool>> predicate)
         {
             IQueryable<T> query = _dbSet.Where(predicate);
 
@@ -47,7 +47,7 @@ namespace ShipConnect.Repository
                 query = query.Where(e => EF.Property<bool>(e, "IsDeleted") == false);
             }
 
-            return await Task.FromResult(query);
+            return Task.FromResult(query);
         }
 
         public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)

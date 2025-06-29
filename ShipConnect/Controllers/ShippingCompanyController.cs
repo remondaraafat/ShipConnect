@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using ShipConnect.CQRS.ShippingCompanies.Queries;
 using ShipConnect.DTOs.ShippingCompanies;
 using ShipConnect.ShippingCompanies.Commands;
 using ShipConnect.ShippingCompanies.Querys;
@@ -49,4 +50,20 @@ public class ShippingCompanyController : ControllerBase
         var success = await _mediator.Send(new DeleteShippingCompanyCommand(id));
         return success ? NoContent() : NotFound();
     }
+
+    [HttpGet("total-count")]
+    public async Task<IActionResult> GetTotalShippingCompaniesCount()
+    {
+        var count = await _mediator.Send(new GetTotalShippingCompaniesCountQuery());
+        return Ok(new { totalCompanies = count });
+    }
+
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchByName([FromQuery] string name)
+    {
+        var result = await _mediator.Send(new SearchShippingCompaniesByNameQuery(name));
+        return Ok(result);
+    }
+
+
 }

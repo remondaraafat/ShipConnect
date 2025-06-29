@@ -14,6 +14,8 @@ namespace ShipConnect.UnitOfWorkContract
         private IShippingCompanyRepository _shippingCompanyRepository;
         private IStartUpRepository _startUpRepository;
         private ITrackingRepository _trackingRepository;
+        private IRatingRepository _RatingRepository;
+
 
         public UnitOfWork(ShipConnectContext context)
         {
@@ -78,6 +80,23 @@ namespace ShipConnect.UnitOfWorkContract
                 return _trackingRepository;
             }
         }
+
+        public IRatingRepository RatingRepository
+        {
+            get
+            {
+                if (_RatingRepository == null)
+                    _RatingRepository = new RatingRepository(_context);
+                return _RatingRepository;
+            }
+        }
+
+
+
+
+
+
+
 
         public async Task SaveAsync()
         {
