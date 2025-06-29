@@ -13,6 +13,7 @@ namespace ShipConnect.Models
         public string? City { get; set; }
         [Phone]
         public string? Phone { get; set; }
+        public string? Website { get; set; }
         [StringLength(100)]
         public string BusinessCategory { get; set; }
         public string? TaxId { get; set; }
