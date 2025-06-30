@@ -13,6 +13,8 @@ namespace ShipConnect.CQRS.Login.Commands
     {
         public string Email { get; set; }
         public string Password { get; set; }
+
+        public bool RememberMe { get; set; } 
     }
 
     public class LoginCommandHandler : IRequestHandler<LoginCommand, GeneralResponse<string>>
@@ -54,7 +56,7 @@ namespace ShipConnect.CQRS.Login.Commands
 
             var signInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecritKey"]));
             var signingCredentials = new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256);
-            var expiresAt = DateTime.UtcNow.AddHours(1);
+            var expiresAt = request.RememberMe? DateTime.UtcNow.AddDays(7): DateTime.UtcNow.AddHours(1);
 
             //Design token
             var token = new JwtSecurityToken(

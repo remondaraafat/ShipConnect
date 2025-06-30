@@ -39,4 +39,5 @@ namespace ShipConnect.Models
         //[ForeignKey(nameof(StartUpId))]
         //public StartUp? StartUp { get; set; }
     }
+
 }

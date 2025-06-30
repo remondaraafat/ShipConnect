@@ -1,10 +1,12 @@
 ﻿
+using System;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ShipConnect.Data;
+using ShipConnect.Helpers;
 using ShipConnect.Models;
 using ShipConnect.Repository;
 using ShipConnect.RepositoryContract;
@@ -22,6 +24,7 @@ namespace ShipConnect
 
             builder.Services.AddControllers();
 
+
             #region DbContext
 
             builder.Services.AddDbContext<ShipConnectContext>(options =>
@@ -30,10 +33,12 @@ namespace ShipConnect
             });
             #endregion
 
+
             #region JWT
             //register 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ShipConnectContext>();
+            .AddEntityFrameworkStores<ShipConnectContext>()
+            .AddDefaultTokenProviders();
 
             builder.Services.AddAuthentication(options =>
             {

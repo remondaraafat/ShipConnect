@@ -6,9 +6,12 @@ namespace ShipConnect.Models
 {
     public class ApplicationUser:IdentityUser
     {
+        public string CompanyName {  get; set; }
         public string ProfileImageUrl { get; set; }="/images/default-user.png";//default image
         public bool IsActive { get; set; } = true;  //لو الادمن عاوز يعمل تعطيل لحساب المستخدم
         public StartUp? Startup { get; set; }
+
+        public bool AcceptTerms { get; set; } = false;
 
         public ICollection<BankAccount> BankAccounts { get; set; } = new List<BankAccount>();
         public ShippingCompany? ShippingCompany { get; set; }

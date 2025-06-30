@@ -34,6 +34,7 @@ namespace ShipConnect.Controllers
             {
                 var command = new RegisterAsStartUpCommand
                 {
+                    
                     CompanyName = userFromRequest.CompanyName,
                     Email = userFromRequest.Email,
                     Phone = userFromRequest.Phone,
@@ -43,7 +44,8 @@ namespace ShipConnect.Controllers
                     Website = userFromRequest.Website,
                     BusinessCategory = userFromRequest.BusinessCategory,
                     Description = userFromRequest.Description,
-                    TaxId = userFromRequest.TaxId
+                    TaxId = userFromRequest.TaxId,
+                    AcceptTerms = userFromRequest.AcceptTerms,
                 };
 
                 var result = await _mediator.Send(command);
@@ -77,6 +79,7 @@ namespace ShipConnect.Controllers
                     Description = userFromRequest.Description,
                     TaxId = userFromRequest.TaxId,
                     Website = userFromRequest.Website,
+                    AcceptTerms = userFromRequest.AcceptTerms
                 };
 
                 var result = await _mediator.Send(command);
@@ -100,7 +103,9 @@ namespace ShipConnect.Controllers
                 var command = new LoginCommand
                 {
                     Email = userFromRequest.Email,
-                    Password = userFromRequest.Password
+                    Password = userFromRequest.Password,
+                    RememberMe= userFromRequest.RememberMe
+                    
                 };
 
                 var result = await _mediator.Send(command);

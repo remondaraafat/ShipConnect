@@ -44,5 +44,9 @@ namespace ShipConnect.DTOs.AccountDTOs
 
         [Url(ErrorMessage = "Invalid website URL.")]
         public string? Website { get; set; }
+
+        [Required(ErrorMessage = "You must accept the terms and conditions to register.")]
+        public bool AcceptTerms { get; set; } = false;
+
     }
 }
