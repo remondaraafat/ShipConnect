@@ -22,7 +22,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
-  <ItemGroup>
+   <ItemGroup>
     <Folder Include="CQRS\Offers\Commands\" />
     <Folder Include="CQRS\Offers\Queries\" />
     <Folder Include="CQRS\Register\Queries\" />
@@ -35,16 +35,6 @@
     <Folder Include="DTOs\ShippingCompanyDTOs\" />
     <Folder Include="DTOs\ReceivderDTOs\" />
     <Folder Include="DTOs\OfferDTOs\" />
-<<<<<<< HEAD
-    <Folder Include="CQRS\Offers\Commands\" />
-    <Folder Include="CQRS\Offers\Queries\" />
-    <Folder Include="CQRS\Shipments\Commands\" />
-    <Folder Include="CQRS\Shipments\Queries\" />
-    <Folder Include="CQRS\StartUps\Queries\" />
-    <Folder Include="CQRS\Tracking\Commands\" />
-    <Folder Include="CQRS\Tracking\Queries\" />
-=======
->>>>>>> a242051c9ffedfca8cd88739cf07ebd2e219a7fa
   </ItemGroup>
 
 </Project>

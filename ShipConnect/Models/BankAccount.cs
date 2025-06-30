@@ -23,7 +23,7 @@ namespace ShipConnect.Models
         [MaxLength(10)]
         public string Currency { get; set; }
         public bool IsPrimary { get; set; } = false;// هل ده هو الحساب البنكي الأساسي
-<<<<<<< HEAD
+
 
         public string UserId { get; set; }
 
@@ -34,17 +34,9 @@ namespace ShipConnect.Models
         //public int? ShippingCompanyId { get; set; }
         //public int? StartUpId { get; set; }
 
-=======
-        public string UserId { get; set; }
 
-        [ForeignKey(nameof(UserId))]
-        public ApplicationUser User { get; set; }        // اللي هيوصله الإشعار
-        public ICollection<Payment> PaymentsSent { get; set; }
-        public ICollection<Payment> PaymentsReceived { get; set; }
-        //public int? ShippingCompanyId { get; set; }
-        //public int? StartUpId { get; set; }
+       
 
->>>>>>> a242051c9ffedfca8cd88739cf07ebd2e219a7fa
         //[ForeignKey(nameof(ShippingCompanyId))]
         //public ShippingCompany? ShippingCompany { get; set; }
 
