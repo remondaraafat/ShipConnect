@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using ShipConnect.CQRS.RoleCQRS.Command;
+using ShipConnect.DTOs.RoleDTOs;
 using ShipConnect.Models;
 
 namespace ShipConnect.Controllers
@@ -17,13 +19,29 @@ namespace ShipConnect.Controllers
         {
             _mediator = mediator;
         }
+        //create role
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GeneralResponse<string>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
+        [ProducesDefaultResponseType(typeof(ProblemDetails))]
+        //[Authorize(Roles = "Admin")]
         [HttpPost("Create")]
-        [ProducesDefaultResponseType(typeof(int))]
 
-        public async Task<ActionResult> CreateRoleAsync(string role)
+        public async Task<GeneralResponse<string>> CreateRole([FromBody] CreateRoleDTO dto)
         {
-            return Ok(await _mediator.Send());
+            return await _mediator.Send(new CreateRoleCommand { DTO= dto});
         }
+        //assign role to user
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GeneralResponse<string>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
+        [ProducesDefaultResponseType(typeof(ProblemDetails))]
+        // [Authorize(Roles = "Admin")]
+        [HttpPost("assignrole")]
+        public async Task<GeneralResponse<string>> AssignRole([FromBody] AssignRoleToUserDTO dto)
+        {
+            return await _mediator.Send(new AssignRoleToUserCommand { DTO=dto} );
+        }
+       
+        //----------------------------------------------------------------------------------------------------------------------------------
         //private readonly UserManager<ApplicationUser> userManager;
         //private readonly RoleManager<IdentityRole> roleManager;
         //private readonly IConfiguration config;
@@ -59,7 +77,7 @@ namespace ShipConnect.Controllers
         //    return BadRequest(result.Errors);
         //}
 
-       // [Authorize(Roles = "Admin")]
+        // [Authorize(Roles = "Admin")]
         //[HttpPost("assignrole")]
         //public async Task<IActionResult> AssignRole(string userId, string role)
         //{
