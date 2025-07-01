@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ShipConnect.CQRS.Ratings.Commands;
 using ShipConnect.CQRS.Ratings.Queries;
 using ShipConnect.DTOs.RatingDTOs;
+using ShipConnect.Helpers;
 
 namespace ShipConnect.Controllers
 {
@@ -20,40 +21,36 @@ namespace ShipConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateRatingDto dto)
         {
-            var result = await _mediator.Send(new CreateRatingCommand(dto));
-            return Ok(result);
+            var response = await _mediator.Send(new CreateRatingCommand(dto));
+            return response.Success ? Ok(response) : BadRequest(response);
         }
 
         [HttpGet("company/{companyId}")]
         public async Task<IActionResult> GetByCompany(int companyId)
         {
-            var result = await _mediator.Send(new GetRatingsByCompanyIdQuery(companyId));
-            return Ok(result);
+            var response = await _mediator.Send(new GetRatingsByCompanyIdQuery(companyId));
+            return response.Success ? Ok(response) : NotFound(response);
         }
-
 
         [HttpGet("company/{companyId}/average")]
         public async Task<IActionResult> GetAverageScore(int companyId)
         {
-            var average = await _mediator.Send(new GetCompanyRatingAverageQuery(companyId));
-            return Ok(new { CompanyId = companyId, AverageScore = average });
+            var response = await _mediator.Send(new GetCompanyRatingAverageQuery(companyId));
+            return response.Success ? Ok(response) : NotFound(response);
         }
-
-
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateRatingDto dto)
         {
-            var result = await _mediator.Send(new UpdateRatingCommand(id, dto));
-            return result == null ? NotFound() : Ok(result);
+            var response = await _mediator.Send(new UpdateRatingCommand(id, dto));
+            return response.Success ? Ok(response) : NotFound(response);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var success = await _mediator.Send(new DeleteRatingCommand(id));
-            return success ? NoContent() : NotFound();
+            var response = await _mediator.Send(new DeleteRatingCommand(id));
+            return response.Success ? NoContent() : NotFound(response);
         }
     }
-
 }

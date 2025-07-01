@@ -2,7 +2,8 @@
 
 namespace ShipConnect.RepositoryContract
 {
-    public interface IRatingRepository : IGenericRepository<Rating>
+    public interface IRatingRepository:IGenericRepository<Rating>
     {
+
     }
 }

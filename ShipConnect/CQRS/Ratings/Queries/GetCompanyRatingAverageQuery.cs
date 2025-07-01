@@ -1,20 +1,17 @@
 ﻿using MediatR;
+using ShipConnect.Helpers;
 using ShipConnect.UnitOfWorkContract;
 
 namespace ShipConnect.CQRS.Ratings.Queries
 {
-    public class GetCompanyRatingAverageQuery : IRequest<double?>
+    public class GetCompanyRatingAverageQuery : IRequest<GeneralResponse<double?>>
     {
         public int CompanyId { get; }
-
-        public GetCompanyRatingAverageQuery(int companyId)
-        {
-            CompanyId = companyId;
-        }
+        public GetCompanyRatingAverageQuery(int companyId) => CompanyId = companyId;
     }
 
 
-    public class GetCompanyRatingAverageHandler : IRequestHandler<GetCompanyRatingAverageQuery, double?>
+    public class GetCompanyRatingAverageHandler : IRequestHandler<GetCompanyRatingAverageQuery, GeneralResponse<double?>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -23,15 +20,19 @@ namespace ShipConnect.CQRS.Ratings.Queries
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<double?> Handle(GetCompanyRatingAverageQuery request, CancellationToken cancellationToken)
+        public async Task<GeneralResponse<double?>> Handle(GetCompanyRatingAverageQuery request, CancellationToken cancellationToken)
         {
             var allRatings = await _unitOfWork.RatingRepository.GetAllAsync();
             var companyRatings = allRatings.Where(r => r.CompanyId == request.CompanyId);
 
             if (!companyRatings.Any())
-                return null; // No ratings
+                return GeneralResponse<double?>.FailResponse("No ratings found for this company");
 
-            return companyRatings.Average(r => r.Score);
+            var average = companyRatings.Average(r => r.Score);
+            return GeneralResponse<double?>.SuccessResponse("Average rating retrieved", average);
         }
     }
+
+
+
 }

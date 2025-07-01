@@ -1,13 +1,14 @@
 ﻿using MediatR;
+using ShipConnect.Helpers;
 using ShipConnect.UnitOfWorkContract;
 
 namespace ShipConnect.CQRS.ShippingCompanies.Queries
 {
-    public class GetTotalShippingCompaniesCountQuery : IRequest<int>
+    public class GetTotalShippingCompaniesCountQuery : IRequest<GeneralResponse<int>>
     {
     }
 
-    public class GetTotalShippingCompaniesCountHandler : IRequestHandler<GetTotalShippingCompaniesCountQuery, int>
+    public class GetTotalShippingCompaniesCountHandler : IRequestHandler<GetTotalShippingCompaniesCountQuery, GeneralResponse<int>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -16,10 +17,12 @@ namespace ShipConnect.CQRS.ShippingCompanies.Queries
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<int> Handle(GetTotalShippingCompaniesCountQuery request, CancellationToken cancellationToken)
+        public async Task<GeneralResponse<int>> Handle(GetTotalShippingCompaniesCountQuery request, CancellationToken cancellationToken)
         {
             var companies = await _unitOfWork.ShippingCompanyRepository.GetAllAsync();
-            return companies.Count();
+            int count = companies.Count();
+
+            return GeneralResponse<int>.SuccessResponse("Total shipping companies count retrieved successfully", count);
         }
     }
 }

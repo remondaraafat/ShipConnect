@@ -1,14 +1,14 @@
 ﻿using MediatR;
+using ShipConnect.Helpers;
 using ShipConnect.UnitOfWorkContract;
 
 namespace ShipConnect.CQRS.Offers.Queries
 {
-    public class GetTotalOffersCountQuery : IRequest<int>
+    public class GetTotalOffersCountQuery : IRequest<GeneralResponse<int>>
     {
     }
 
-
-    public class GetTotalOffersCountHandler : IRequestHandler<GetTotalOffersCountQuery, int>
+    public class GetTotalOffersCountHandler : IRequestHandler<GetTotalOffersCountQuery, GeneralResponse<int>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -17,10 +17,12 @@ namespace ShipConnect.CQRS.Offers.Queries
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<int> Handle(GetTotalOffersCountQuery request, CancellationToken cancellationToken)
+        public async Task<GeneralResponse<int>> Handle(GetTotalOffersCountQuery request, CancellationToken cancellationToken)
         {
             var allOffers = await _unitOfWork.OfferRepository.GetAllAsync();
-            return allOffers.Count();
+            int count = allOffers.Count();
+
+            return GeneralResponse<int>.SuccessResponse("Total offers counted successfully", count);
         }
     }
 }

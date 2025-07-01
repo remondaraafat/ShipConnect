@@ -1,9 +1,10 @@
 ﻿using MediatR;
+using ShipConnect.Helpers;
 using ShipConnect.UnitOfWorkContract;
 
 namespace ShipConnect.CQRS.Offers.Commands
 {
-    public class UpdateOfferStatusCommand : IRequest<bool>
+    public class UpdateOfferStatusCommand : IRequest<GeneralResponse<bool>>
     {
         public int OfferId { get; set; }
         public bool IsAccepted { get; set; }
@@ -15,7 +16,7 @@ namespace ShipConnect.CQRS.Offers.Commands
         }
     }
 
-    public class UpdateOfferStatusHandler : IRequestHandler<UpdateOfferStatusCommand, bool>
+    public class UpdateOfferStatusHandler : IRequestHandler<UpdateOfferStatusCommand, GeneralResponse<bool>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -24,16 +25,19 @@ namespace ShipConnect.CQRS.Offers.Commands
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<bool> Handle(UpdateOfferStatusCommand request, CancellationToken cancellationToken)
+        public async Task<GeneralResponse<bool>> Handle(UpdateOfferStatusCommand request, CancellationToken cancellationToken)
         {
             var offer = await _unitOfWork.OfferRepository.GetByIdAsync(request.OfferId);
-            if (offer == null) return false;
+            if (offer == null)
+                return GeneralResponse<bool>.FailResponse("Offer not found");
 
             offer.IsAccepted = request.IsAccepted;
             _unitOfWork.OfferRepository.Update(offer);
             await _unitOfWork.SaveAsync();
 
-            return true;
+            string msg = request.IsAccepted ? "Offer accepted successfully" : "Offer rejected successfully";
+
+            return GeneralResponse<bool>.SuccessResponse(msg, true);
         }
     }
 }

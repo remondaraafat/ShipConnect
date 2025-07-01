@@ -1,17 +1,23 @@
 ﻿using MediatR;
 using ShipConnect.DTOs.RatingDTOs;
+using ShipConnect.Helpers;
 using ShipConnect.Models;
 using ShipConnect.UnitOfWorkContract;
 
 namespace ShipConnect.CQRS.Ratings.Commands
 {
-    public class CreateRatingCommand : IRequest<ReadRatingDto>
+    public class CreateRatingCommand : IRequest<GeneralResponse<ReadRatingDto>>
     {
         public CreateRatingDto Dto { get; }
-        public CreateRatingCommand(CreateRatingDto dto) => Dto = dto;
+
+        public CreateRatingCommand(CreateRatingDto dto)
+        {
+            Dto = dto;
+        }
     }
 
-    public class CreateRatingHandler : IRequestHandler<CreateRatingCommand, ReadRatingDto>
+
+    public class CreateRatingHandler : IRequestHandler<CreateRatingCommand, GeneralResponse<ReadRatingDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -20,7 +26,7 @@ namespace ShipConnect.CQRS.Ratings.Commands
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<ReadRatingDto> Handle(CreateRatingCommand request, CancellationToken cancellationToken)
+        public async Task<GeneralResponse<ReadRatingDto>> Handle(CreateRatingCommand request, CancellationToken cancellationToken)
         {
             var entity = new Rating
             {
@@ -35,7 +41,7 @@ namespace ShipConnect.CQRS.Ratings.Commands
             await _unitOfWork.RatingRepository.AddAsync(entity);
             await _unitOfWork.SaveAsync();
 
-            return new ReadRatingDto
+            var dto = new ReadRatingDto
             {
                 Id = entity.Id,
                 StartUpId = entity.StartUpId,
@@ -44,6 +50,9 @@ namespace ShipConnect.CQRS.Ratings.Commands
                 Score = entity.Score,
                 Comment = entity.Comment
             };
+
+            return GeneralResponse<ReadRatingDto>.SuccessResponse("Rating created successfully", dto);
         }
     }
+
 }

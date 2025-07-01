@@ -1,16 +1,17 @@
 ﻿using MediatR;
 using ShipConnect.DTOs.OfferDTOs;
+using ShipConnect.Helpers;
 using ShipConnect.UnitOfWorkContract;
 
 namespace ShipConnect.CQRS.Offers.Queries
 {
-    public class GetOffersByShipmentIdQuery : IRequest<List<ReadOfferDto>>
+    public class GetOffersByShipmentIdQuery : IRequest<GeneralResponse<List<ReadOfferDto>>>
     {
         public int ShipmentId { get; set; }
         public GetOffersByShipmentIdQuery(int shipmentId) => ShipmentId = shipmentId;
     }
 
-    public class GetOffersByShipmentIdHandler : IRequestHandler<GetOffersByShipmentIdQuery, List<ReadOfferDto>>
+    public class GetOffersByShipmentIdHandler : IRequestHandler<GetOffersByShipmentIdQuery, GeneralResponse<List<ReadOfferDto>>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -19,12 +20,12 @@ namespace ShipConnect.CQRS.Offers.Queries
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<ReadOfferDto>> Handle(GetOffersByShipmentIdQuery request, CancellationToken cancellationToken)
+        public async Task<GeneralResponse<List<ReadOfferDto>>> Handle(GetOffersByShipmentIdQuery request, CancellationToken cancellationToken)
         {
             var offers = await _unitOfWork.OfferRepository
                 .GetWithFilterAsync(o => o.ShipmentId == request.ShipmentId);
 
-            return offers.Select(o => new ReadOfferDto
+            var data = offers.Select(o => new ReadOfferDto
             {
                 Id = o.Id,
                 Price = o.Price,
@@ -34,7 +35,8 @@ namespace ShipConnect.CQRS.Offers.Queries
                 ShipmentId = o.ShipmentId,
                 ShippingCompanyId = o.ShippingCompanyId
             }).ToList();
+
+            return GeneralResponse<List<ReadOfferDto>>.SuccessResponse("Offers retrieved successfully", data);
         }
     }
-
 }

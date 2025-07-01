@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+    <PackageReference Include="MailKit" Version="4.13.0" />
     <PackageReference Include="MediatR" Version="12.5.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.17" />
@@ -19,9 +20,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="MimeKit" Version="4.13.0" />
+    <PackageReference Include="NETCore.MailKit" Version="2.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
-
   <ItemGroup>
     <Folder Include="CQRS\Register\Queries\" />
     <Folder Include="CQRS\Shipments\Commands\" />
@@ -33,5 +35,17 @@
     <Folder Include="DTOs\ShippingCompanyDTOs\" />
     <Folder Include="DTOs\ReceivderDTOs\" />
   </ItemGroup>
-
+	<ItemGroup>
+		<Folder Include="CQRS\Offers\Commands\" />
+		<Folder Include="CQRS\Offers\Queries\" />
+		<Folder Include="CQRS\Register\Queries\" />
+		<Folder Include="CQRS\Shipments\Queries\" />
+		<Folder Include="CQRS\StartUps\Queries\" />
+		<Folder Include="CQRS\Tracking\Commands\" />
+		<Folder Include="CQRS\Tracking\Queries\" />
+		<Folder Include="DTOs\TrackingDTOs\" />
+		<Folder Include="DTOs\ShippingCompanyDTOs\" />
+		<Folder Include="DTOs\ReceivderDTOs\" />
+		<Folder Include="DTOs\OfferDTOs\" />
+	</ItemGroup>
 </Project>

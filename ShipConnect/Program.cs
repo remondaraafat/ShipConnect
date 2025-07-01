@@ -1,10 +1,12 @@
 ﻿
+using System;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ShipConnect.Data;
+using ShipConnect.Helpers;
 using ShipConnect.Models;
 using ShipConnect.Repository;
 using ShipConnect.RepositoryContract;
@@ -22,16 +24,21 @@ namespace ShipConnect
 
             builder.Services.AddControllers();
 
-            #region DbContext & Identity
+
+            #region DbContext
 
             builder.Services.AddDbContext<ShipConnectContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("ShipConnect"));
             });
+            #endregion
 
+
+            #region JWT
             //register 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ShipConnectContext>();
+            .AddEntityFrameworkStores<ShipConnectContext>()
+            .AddDefaultTokenProviders();
 
             builder.Services.AddAuthentication(options =>
             {
@@ -45,8 +52,10 @@ namespace ShipConnect
                 options.TokenValidationParameters = new TokenValidationParameters()
                 {
                     ValidateIssuer = true,
-                    ValidIssuer = builder.Configuration["JWT:IssuerIP"],
                     ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["JWT:IssuerIP"],
                     ValidAudience = builder.Configuration["JWT:AudienceIP"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecritKey"]))
                 };
@@ -70,7 +79,8 @@ namespace ShipConnect
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             #endregion
-
+            builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+            builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 

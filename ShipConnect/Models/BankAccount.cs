@@ -23,6 +23,7 @@ namespace ShipConnect.Models
         [MaxLength(10)]
         public string Currency { get; set; }
         public bool IsPrimary { get; set; } = false;// هل ده هو الحساب البنكي الأساسي
+
         public string UserId { get; set; }
 
         [ForeignKey(nameof(UserId))]
@@ -38,4 +39,5 @@ namespace ShipConnect.Models
         //[ForeignKey(nameof(StartUpId))]
         //public StartUp? StartUp { get; set; }
     }
+
 }

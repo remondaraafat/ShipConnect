@@ -1,10 +1,11 @@
 ﻿using MediatR;
 using ShipConnect.DTOs.RatingDTOs;
+using ShipConnect.Helpers;
 using ShipConnect.UnitOfWorkContract;
 
 namespace ShipConnect.CQRS.Ratings.Commands
 {
-    public class UpdateRatingCommand : IRequest<ReadRatingDto?>
+    public class UpdateRatingCommand : IRequest<GeneralResponse<ReadRatingDto>>
     {
         public int Id { get; set; }
         public UpdateRatingDto Dto { get; set; }
@@ -15,7 +16,7 @@ namespace ShipConnect.CQRS.Ratings.Commands
         }
     }
 
-    public class UpdateRatingHandler : IRequestHandler<UpdateRatingCommand, ReadRatingDto?>
+    public class UpdateRatingHandler : IRequestHandler<UpdateRatingCommand, GeneralResponse<ReadRatingDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -24,10 +25,11 @@ namespace ShipConnect.CQRS.Ratings.Commands
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<ReadRatingDto?> Handle(UpdateRatingCommand request, CancellationToken cancellationToken)
+        public async Task<GeneralResponse<ReadRatingDto>> Handle(UpdateRatingCommand request, CancellationToken cancellationToken)
         {
             var rating = await _unitOfWork.RatingRepository.GetByIdAsync(request.Id);
-            if (rating == null) return null;
+            if (rating == null)
+                return GeneralResponse<ReadRatingDto>.FailResponse("Rating not found");
 
             rating.Score = request.Dto.Score;
             rating.Comment = request.Dto.Comment;
@@ -36,7 +38,7 @@ namespace ShipConnect.CQRS.Ratings.Commands
             _unitOfWork.RatingRepository.Update(rating);
             await _unitOfWork.SaveAsync();
 
-            return new ReadRatingDto
+            var dto = new ReadRatingDto
             {
                 Id = rating.Id,
                 StartUpId = rating.StartUpId,
@@ -45,6 +47,9 @@ namespace ShipConnect.CQRS.Ratings.Commands
                 Score = rating.Score,
                 Comment = rating.Comment
             };
+
+            return GeneralResponse<ReadRatingDto>.SuccessResponse("Rating updated successfully", dto);
         }
     }
+
 }

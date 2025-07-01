@@ -26,7 +26,7 @@ namespace ShipConnect.Repository
             return entity;
         }
 
-        public Task<IQueryable<T>> GetAllAsync()
+        public  Task<IQueryable<T>> GetAllAsync()
         {
             IQueryable<T> query = _dbSet;
 
@@ -38,7 +38,8 @@ namespace ShipConnect.Repository
             return Task.FromResult(query);
         }
 
-        public Task<IQueryable<T>> GetWithFilterAsync(Expression<Func<T, bool>> predicate)
+       
+        public  Task<IQueryable<T>> GetWithFilterAsync(Expression<Func<T, bool>> predicate)
         {
             IQueryable<T> query = _dbSet.Where(predicate);
 
@@ -90,7 +91,6 @@ namespace ShipConnect.Repository
                 }
             }
 
-            // حذف فعلي لو مش فيه IsDeleted
             _dbSet.Remove(entity);
         }
 

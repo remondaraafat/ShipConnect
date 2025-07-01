@@ -1,10 +1,11 @@
 ﻿using MediatR;
 using ShipConnect.DTOs.ShippingCompanies;
+using ShipConnect.Helpers;
 using ShipConnect.UnitOfWorkContract;
 
 namespace ShipConnect.CQRS.ShippingCompanies.Queries
 {
-    public class SearchShippingCompaniesByNameQuery : IRequest<List<ShippingCompanyDto>>
+    public class SearchShippingCompaniesByNameQuery : IRequest<GeneralResponse<List<ShippingCompanyDto>>>
     {
         public string Name { get; set; }
 
@@ -15,7 +16,7 @@ namespace ShipConnect.CQRS.ShippingCompanies.Queries
     }
 
     public class SearchShippingCompaniesByNameHandler
-        : IRequestHandler<SearchShippingCompaniesByNameQuery, List<ShippingCompanyDto>>
+        : IRequestHandler<SearchShippingCompaniesByNameQuery, GeneralResponse<List<ShippingCompanyDto>>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -24,12 +25,12 @@ namespace ShipConnect.CQRS.ShippingCompanies.Queries
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<ShippingCompanyDto>> Handle(SearchShippingCompaniesByNameQuery request, CancellationToken cancellationToken)
+        public async Task<GeneralResponse<List<ShippingCompanyDto>>> Handle(SearchShippingCompaniesByNameQuery request, CancellationToken cancellationToken)
         {
             var companies = await _unitOfWork.ShippingCompanyRepository
                 .GetWithFilterAsync(c => c.CompanyName.ToLower().Contains(request.Name.ToLower()));
 
-            return companies.Select(c => new ShippingCompanyDto
+            var result = companies.Select(c => new ShippingCompanyDto
             {
                 Id = c.Id,
                 CompanyName = c.CompanyName,
@@ -44,6 +45,8 @@ namespace ShipConnect.CQRS.ShippingCompanies.Queries
                 TransportType = c.TransportType,
                 ShippingScope = c.ShippingScope
             }).ToList();
+
+            return GeneralResponse<List<ShippingCompanyDto>>.SuccessResponse("Matching shipping companies retrieved", result);
         }
     }
 }
