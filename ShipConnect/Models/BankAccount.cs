@@ -33,7 +33,7 @@ namespace ShipConnect.Models
         public ICollection<Payment> PaymentsReceived { get; set; }
         //public int? ShippingCompanyId { get; set; }
         //public int? StartUpId { get; set; }
-
+ 
         //[ForeignKey(nameof(ShippingCompanyId))]
         //public ShippingCompany? ShippingCompany { get; set; }
 

@@ -23,12 +23,9 @@ namespace ShipConnect.CQRS.RoleCQRS.Command
         }
         public async Task<GeneralResponse<string>> Handle(AssignRoleToUserCommand request, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(request.DTO.UserId) )
-            {
-                return await Task.FromResult(GeneralResponse<string>.FailResponse("UserId and Role name shouldn't have white spaces."));
-            }
 
-            var user = await userManager.FindByIdAsync(request.DTO.UserId);
+            ApplicationUser user = await userManager.FindByEmailAsync(request.DTO.Email);
+            
             if (user == null)
             {
                 return GeneralResponse<string>.FailResponse("User not found.");
