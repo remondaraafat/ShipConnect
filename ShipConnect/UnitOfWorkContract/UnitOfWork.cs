@@ -8,12 +8,20 @@ namespace ShipConnect.UnitOfWorkContract
     {
         private readonly ShipConnectContext _context;
 
+        private IBankAccountRepository _bankAccountRepository;
+        private IChatMessageRepository _chatMessageRepository;
+        private INotificationRepository _notificationRepository;
+        private IPaymentRepository _paymentRepository;
         private IOfferRepository _offerRepository;
-        private IReceiverRepository _receivderRepository;
+        private IReceiverRepository _receiverRepository;
         private IShipmentRepository _shipmentRepository;
         private IShippingCompanyRepository _shippingCompanyRepository;
         private IStartUpRepository _startUpRepository;
         private ITrackingRepository _trackingRepository;
+        private IRatingRepository _RatingRepository;
+
+
+        private IPasswordResetCodeRepository _passwordResetCodeRepository;
 
         public UnitOfWork(ShipConnectContext context)
         {
@@ -33,9 +41,9 @@ namespace ShipConnect.UnitOfWorkContract
         public IReceiverRepository ReceiverRepository{
             get
             {
-                if (_receivderRepository == null)
-                    _receivderRepository = new ReceiverRepository(_context);
-                return _receivderRepository;
+                if (_receiverRepository == null)
+                    _receiverRepository = new ReceiverRepository(_context);
+                return _receiverRepository;
             }
         }
 
@@ -76,6 +84,73 @@ namespace ShipConnect.UnitOfWorkContract
                 if (_trackingRepository == null)
                     _trackingRepository = new TrackingRepository(_context);
                 return _trackingRepository;
+            }
+        }
+
+        public IBankAccountRepository BankAccountRepository
+        {
+            get
+            {
+                if (_bankAccountRepository == null)
+                    _bankAccountRepository = new BankAccountRepository(_context);
+                return _bankAccountRepository;
+            }
+        }
+
+        public IChatMessageRepository ChatMessageRepository
+        {
+            get
+            {
+                if (_chatMessageRepository == null)
+                    _chatMessageRepository = new ChatMessageRepository(_context);
+                return _chatMessageRepository;
+            }
+        }
+
+        public INotificationRepository NotificationRepository
+        {
+            get
+            {
+                if (_notificationRepository == null)
+                    _notificationRepository = new NotificationRepository(_context);
+                return _notificationRepository;
+            }
+        }
+
+        public IPaymentRepository PaymentRepository
+        {
+            get
+            {
+                if (_paymentRepository == null)
+                    _paymentRepository = new PaymentRepository(_context);
+                return _paymentRepository;
+            }
+        }
+
+        public IRatingRepository RatingRepository
+        {
+            get
+            {
+                if (_RatingRepository == null)
+                    _RatingRepository = new RatingRepository(_context);
+                return _RatingRepository;
+            }
+        }
+
+
+
+
+
+
+
+
+        public IPasswordResetCodeRepository PasswordResetCodeRepository
+        {
+            get
+            {
+                if (_passwordResetCodeRepository == null)
+                    _passwordResetCodeRepository = new PasswordResetCodeRepository(_context);
+                return _passwordResetCodeRepository;
             }
         }
 

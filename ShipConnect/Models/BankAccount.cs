@@ -34,13 +34,11 @@ namespace ShipConnect.Models
         //public int? ShippingCompanyId { get; set; }
         //public int? StartUpId { get; set; }
 
-
-       
-
         //[ForeignKey(nameof(ShippingCompanyId))]
         //public ShippingCompany? ShippingCompany { get; set; }
 
         //[ForeignKey(nameof(StartUpId))]
         //public StartUp? StartUp { get; set; }
     }
+
 }

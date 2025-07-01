@@ -160,8 +160,15 @@ namespace ShipConnect.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<bool>("AcceptTerms")
+                        .HasColumnType("bit");
+
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -436,6 +443,46 @@ namespace ShipConnect.Migrations
                     b.ToTable("Offers");
                 });
 
+            modelBuilder.Entity("ShipConnect.Models.PasswordResetCode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("nvarchar(6)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ExpirationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PasswordResetCodes");
+                });
+
             modelBuilder.Entity("ShipConnect.Models.Payment", b =>
                 {
                     b.Property<int>("Id")
@@ -556,14 +603,6 @@ namespace ShipConnect.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -580,10 +619,6 @@ namespace ShipConnect.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Phone")
                         .IsRequired()
@@ -621,19 +656,27 @@ namespace ShipConnect.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("DestinationAddress")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("DestinationCity")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("Dimensions")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<decimal?>("MinPrice")
+                    b.Property<decimal>("MinPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Packaging")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Period")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Quantity")
@@ -642,14 +685,27 @@ namespace ShipConnect.Migrations
                     b.Property<int>("ReceiverId")
                         .HasColumnType("int");
 
+                    b.Property<string>("ReceiverNotes")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("RequestedPickupDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("SenderAddress")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("SentDate")
+                    b.Property<string>("SenderCity")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SenderPhone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SentDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("ShipmentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ShippingScope")
                         .HasColumnType("int");
@@ -660,14 +716,16 @@ namespace ShipConnect.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<int>("TransportType")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("VehicleType")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("WeightKg")
                         .HasColumnType("float");
@@ -794,6 +852,9 @@ namespace ShipConnect.Migrations
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Website")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

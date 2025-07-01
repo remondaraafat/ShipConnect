@@ -6,6 +6,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using ShipConnect.CQRS.Login.Commands;
 using ShipConnect.CQRS.Register.Commands;
 using ShipConnect.DTOs.AccountDTOs;
 using ShipConnect.Helpers;
@@ -21,102 +22,103 @@ namespace ShipConnect.Controllers
     {
         private readonly IMediator _mediator;
 
-        //private readonly RoleManager<IdentityRole> roleManager;
-        //private readonly IConfiguration Configuration;
-
-        public AccountController(IMediator mediator)//,IConfiguration configuration,RoleManager<IdentityRole> roleManager)
+        public AccountController(IMediator mediator)
         {
             this._mediator = mediator;
-            //this.roleManager = roleManager;
-            //this.Configuration = configuration;
         }
 
-        [HttpPost("Register/startUp")]
+        [HttpPost("register/startUp")]
         public async Task<IActionResult> RegisterAsStartUp([FromBody] RegisterAsStartUpDTO userFromRequest)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
+                var command = new RegisterAsStartUpCommand
+                {
+                    
+                    CompanyName = userFromRequest.CompanyName,
+                    Email = userFromRequest.Email,
+                    Phone = userFromRequest.Phone,
+                    Password = userFromRequest.Password,
+                    Address = userFromRequest.Address,
+                    City = userFromRequest.City,
+                    Website = userFromRequest.Website,
+                    BusinessCategory = userFromRequest.BusinessCategory,
+                    Description = userFromRequest.Description,
+                    TaxId = userFromRequest.TaxId,
+                    AcceptTerms = userFromRequest.AcceptTerms,
+                };
 
-                return BadRequest(GeneralResponse<List<string>>.FailResponse("Validation Failed", errors));
+                var result = await _mediator.Send(command);
+
+                return result.Success ? Ok(result) : BadRequest(result);
             }
+            var errors = ModelState.Values
+            .SelectMany(v => v.Errors)
+            .Select(e => e.ErrorMessage)
+            .ToList();
 
-            var command = new RegisterAsStartUpCommand
-            {
-                StartUpName = userFromRequest.StartUpName,
-                Email = userFromRequest.Email,
-                Phone = userFromRequest.Phone,
-                Password = userFromRequest.Password,
-                Address = userFromRequest.Address,
-                City = userFromRequest.City,
-                BusinessCategory = userFromRequest.BusinessCategory,
-                Description = userFromRequest.Description,
-                TaxId = userFromRequest.TaxId
-            };
-
-            var result = await _mediator.Send(command);
-
-            if (result.Success)
-                return Ok(result);
-
-            return BadRequest(result);
+            return BadRequest(GeneralResponse<List<string>>.FailResponse("Validation Failed", errors));
         }
 
-        //[HttpPost("Login")]
-        //public async Task<IActionResult> Login(LoginDTO userFromRequest)
-        //{
-        //    if(ModelState.IsValid)
-        //    {
-        //        //ckeck
-        //        ApplicationUser userFromDb = await UserManager.FindByNameAsync(userFromRequest.UserName);
-        //        if (userFromDb != null)
-        //        {
-        //            bool fount = await UserManager.CheckPasswordAsync(userFromDb, userFromRequest.Password);
+        [HttpPost("register/shippingCompany")]
+        public async Task<IActionResult> RegisterAsShippingCompany([FromBody] RegisterAsShippingCompanyDTO userFromRequest)
+        {
+            if (ModelState.IsValid)
+            {
+                var command = new RegisterAsShippingCompanyCommand
+                {
+                    CompanyName = userFromRequest.CompanyName,
+                    Email = userFromRequest.Email,
+                    Phone = userFromRequest.Phone,
+                    Password = userFromRequest.Password,
+                    Address = userFromRequest.Address,
+                    City = userFromRequest.City,
+                    TransportType = userFromRequest.TransportType,
+                    ShippingScope = userFromRequest.ShippingScope,
+                    LicenseNumber = userFromRequest.LicenseNumber,
+                    Description = userFromRequest.Description,
+                    TaxId = userFromRequest.TaxId,
+                    Website = userFromRequest.Website,
+                    AcceptTerms = userFromRequest.AcceptTerms
+                };
 
-        //            if (fount)
-        //            {
-        //                List<Claim> userClaims = new List<Claim>();
-        //                //Token Generated Id change (JWT
-        //                userClaims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
-        //                userClaims.Add(new Claim(ClaimTypes.NameIdentifier, userFromDb.Id.ToString()));
-        //                userClaims.Add(new Claim(ClaimTypes.Name, userFromDb.UserName));
+                var result = await _mediator.Send(command);
 
-        //                ICollection<string> userRoles = await UserManager.GetRolesAsync(userFromDb);
+                return result.Success ? Ok(result) : BadRequest(result);
+            }
 
-        //                foreach (var roleName in userRoles)
-        //                {
-        //                    userClaims.Add(new Claim(ClaimTypes.Role, roleName));
-        //                }
+            var errors = ModelState.Values
+            .SelectMany(v => v.Errors)
+            .Select(e => e.ErrorMessage)
+            .ToList();
 
-        //                var SignInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:SecritKey"]));
+            return BadRequest(GeneralResponse<List<string>>.FailResponse("Validation Failed", errors));
+        }
 
-        //                SigningCredentials signingCredentials = new SigningCredentials(SignInKey, SecurityAlgorithms.HmacSha256);
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login(LoginDTO userFromRequest)
+        {
+            if (ModelState.IsValid)
+            {
+                var command = new LoginCommand
+                {
+                    Email = userFromRequest.Email,
+                    Password = userFromRequest.Password,
+                    RememberMe= userFromRequest.RememberMe
+                    
+                };
 
-        //                //Design token
-        //                JwtSecurityToken myToken = new JwtSecurityToken(
-        //                    issuer: Configuration["JWT:IssuerIP"],
-        //                    audience: Configuration["JWT:AudienceIP"],
-        //                    expires: DateTime.UtcNow.AddHours(1),
-        //                    claims: userClaims,
-        //                    signingCredentials: signingCredentials
-        //                );
+                var result = await _mediator.Send(command);
 
-        //                //generate token
-        //                return Ok(new
-        //                {
-        //                    token = new JwtSecurityTokenHandler().WriteToken(myToken),
-        //                    expiration = DateTime.Now.AddHours(1)//myToken.ValidTo
-        //                });
-        //            }
-        //        }
-        //        ModelState.AddModelError("UserName", "UserName or Password Invalid");
-        //    }
-        //    return BadRequest(ModelState);
+                return result.Success? Ok(result) : Unauthorized(result);
 
-        //}
+            }
+            var errors = ModelState.Values
+            .SelectMany(v => v.Errors)
+            .Select(e => e.ErrorMessage)
+            .ToList();
 
+            return BadRequest(GeneralResponse<List<string>>.FailResponse("Validation Failed", errors));
+        }
     }
 }
