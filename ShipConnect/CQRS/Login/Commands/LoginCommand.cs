@@ -56,7 +56,7 @@ namespace ShipConnect.CQRS.Login.Commands
 
             var signInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecritKey"]));
             var signingCredentials = new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256);
-            var expiresAt = request.RememberMe? DateTime.UtcNow.AddDays(7): DateTime.UtcNow.AddHours(1);
+            var expiresAt = request.RememberMe? DateTime.Now.AddDays(7): DateTime.Now.AddHours(1);
 
             //Design token
             var token = new JwtSecurityToken(

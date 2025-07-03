@@ -6,7 +6,7 @@ namespace ShipConnect.DTOs.ShippingCompanies
     {
         public string CompanyName { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public string? City { get; set; }
+        //public string? City { get; set; }
         public string Address { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
         public string? Website { get; set; }

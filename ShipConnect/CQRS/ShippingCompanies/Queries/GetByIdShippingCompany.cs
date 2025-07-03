@@ -30,7 +30,7 @@ namespace ShipConnect.ShippingCompanies.Querys
                 Id = entity.Id,
                 CompanyName = entity.CompanyName,
                 Description = entity.Description,
-                City = entity.City,
+                //City = entity.City,
                 Address = entity.Address,
                 Phone = entity.Phone,
                 Website = entity.Website,

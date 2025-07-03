@@ -31,7 +31,7 @@ namespace ShipConnect.ShippingCompanies.Commands
             {
                 CompanyName = request.Dto.CompanyName,
                 Description = request.Dto.Description,
-                City = request.Dto.City,
+                //City = request.Dto.City,
                 Address = request.Dto.Address,
                 Phone = request.Dto.Phone,
                 Website = request.Dto.Website,
@@ -50,7 +50,7 @@ namespace ShipConnect.ShippingCompanies.Commands
                 Id = entity.Id,
                 CompanyName = entity.CompanyName,
                 Description = entity.Description,
-                City = entity.City,
+                //City = entity.City,
                 Address = entity.Address,
                 Phone = entity.Phone,
                 Website = entity.Website,

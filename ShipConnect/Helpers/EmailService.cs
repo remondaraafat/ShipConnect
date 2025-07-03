@@ -5,9 +5,9 @@ using MimeKit;
 using MimeKit.Text;
 using MailKit.Net.Smtp;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
+using ShipConnect.Models;
 
-
-namespace ShipConnect.Models
+namespace ShipConnect.Helpers
 {
     public class EmailService:IEmailService
     {

@@ -8,7 +8,7 @@ namespace ShipConnect.Models
     public class Payment:BaseEntity
     {
         public decimal Amount { get; set; }
-        public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
+        public DateTime PaymentDate { get; set; } = DateTime.Now;
         public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.BankTransfer;
         public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
         public string? Currency { get; set; } = "EGP";

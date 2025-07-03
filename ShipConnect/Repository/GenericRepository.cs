@@ -81,19 +81,25 @@ namespace ShipConnect.Repository
 
             if (typeof(IBaseModel).IsAssignableFrom(typeof(T)))
             {
-                var prop = typeof(T).GetProperty("IsDeleted");
-                if (prop != null)
-                {
-                    prop.SetValue(entity, true);
-                    _dbSet.Update(entity);
-                    return;
-                }
+                var propDeletedAt = typeof(T).GetProperty("DeletedAt");
+                var propIsDeleted = typeof(T).GetProperty("IsDeleted");
+                if (propIsDeleted != null)
+                    propIsDeleted.SetValue(entity, true);
+
+                if (propDeletedAt != null)
+                    propDeletedAt.SetValue(entity, DateTime.Now); // <-- هنا بنخزن وقت الحذف
+
+                _dbSet.Update(entity);
+                return;
             }
 
             // حذف فعلي لو مش فيه IsDeleted
             _dbSet.Remove(entity);
         }
-
+        public async Task<T?> GetFirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbSet.FirstOrDefaultAsync(predicate);
+        }
 
     }
 }

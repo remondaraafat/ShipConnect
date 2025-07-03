@@ -1,4 +1,5 @@
-﻿using ShipConnect.RepositoryContract;
+﻿using ShipConnect.Data;
+using ShipConnect.RepositoryContract;
 
 namespace ShipConnect.UnitOfWorkContract
 {

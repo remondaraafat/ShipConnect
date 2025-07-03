@@ -7,9 +7,9 @@ namespace ShipConnect.DTOs.ShipmentDTOs
 {
     public class ShipmentDTO
     {
-        [Required(ErrorMessage = "*")]
-        [MaxLength(100)]
-        public string Title { get; set; }
+        //[Required(ErrorMessage = "*")]
+        //[MaxLength(100)]
+        //public string Title { get; set; }
 
         [Required(ErrorMessage = "*")]
         [Range(0.1, double.MaxValue, ErrorMessage ="Weight must be greater than 0")]
@@ -24,15 +24,17 @@ namespace ShipConnect.DTOs.ShipmentDTOs
 
         [Required(ErrorMessage = "*")]
         [Range(0.1, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
-        public decimal MinPrice { get; set; }
+        public decimal Price { get; set; }
        
         [Required(ErrorMessage = "*")]
         [MaxLength (300)]
         public string DestinationAddress { get; set; }
 
         [Required(ErrorMessage = "*")]
-        [MaxLength(100)] 
-        public string DestinationCity { get; set; }
+        public PackagingOptions PackagingOptions { get; set; }
+        //[Required(ErrorMessage = "*")]
+        //[MaxLength(100)] 
+        //public string DestinationCity { get; set; }
 
         [Required(ErrorMessage = "*")]
         [MaxLength(100)] 
@@ -50,9 +52,6 @@ namespace ShipConnect.DTOs.ShipmentDTOs
         [MaxLength(500)]
         public string? Description { get; set; }
         
-        [MaxLength(300)]
-        public string? Notes { get; set; }
-
         [Required(ErrorMessage = "*")]
         public DateTime RequestedPickupDate { get; set; }//تاريخ الاستلام المطلوب
 
@@ -65,9 +64,9 @@ namespace ShipConnect.DTOs.ShipmentDTOs
         [MaxLength(300)]
         public string SenderAddress { get; set; }//عنوان الارسال
 
-        [Required(ErrorMessage ="*")]
-        [MaxLength (100)]
-        public string SenderCity { get; set; }
+        //[Required(ErrorMessage ="*")]
+        //[MaxLength (100)]
+        //public string SenderCity { get; set; }
 
         [Required(ErrorMessage = "*")]
         public DateTime SentDate { get; set; }//تاريخ الارسال
@@ -85,13 +84,10 @@ namespace ShipConnect.DTOs.ShipmentDTOs
         [Phone(ErrorMessage = "Invalid phone number")]
         public string RecipientPhone { get; set; } 
 
-        [MaxLength(500)]
-        public string? ReceiverNotes { get; set; }
-       
-        //[Required(ErrorMessage = "*")]
-        //public int StartupId { get; set; }
+        //[MaxLength(300)]
+        //public string? ReceiverNotes { get; set; }
 
-
+        
     }
 }
 

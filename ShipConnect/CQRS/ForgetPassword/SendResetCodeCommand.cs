@@ -42,7 +42,7 @@ namespace ShipConnect.CQRS.SentResetCode
             {
                 Email = request.Email,
                 Code = code,
-                ExpirationDate = DateTime.UtcNow.AddMinutes(10),
+                ExpirationDate = DateTime.Now.AddMinutes(10),
                 IsUsed = false
             };
 

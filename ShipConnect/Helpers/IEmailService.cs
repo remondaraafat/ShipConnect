@@ -1,4 +1,4 @@
-﻿namespace ShipConnect.Models
+﻿namespace ShipConnect.Helpers
 {
     public interface IEmailService
     {

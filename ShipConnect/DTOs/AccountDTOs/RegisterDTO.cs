@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using static ShipConnect.Enums.Enums;
 
 namespace ShipConnect.DTOs.AccountDTOs
 {
@@ -48,5 +49,7 @@ namespace ShipConnect.DTOs.AccountDTOs
         [Required(ErrorMessage = "You must accept the terms and conditions to register.")]
         public bool AcceptTerms { get; set; } = false;
 
+
     }
 }
+

@@ -85,12 +85,13 @@ namespace ShipConnect.Data
 
                 if (entry.State == EntityState.Added)
                 {
-                    entity.CreatedAt = DateTime.UtcNow;
+                    entity.CreatedAt = DateTime.
+                        ;
                 }
 
                 if (entry.State == EntityState.Modified)
                 {
-                    entity.UpdatedAt = DateTime.UtcNow;
+                    entity.UpdatedAt = DateTime.Now;
                 }
 
                 if (entry.State == EntityState.Deleted)
@@ -98,7 +99,7 @@ namespace ShipConnect.Data
                     // Soft delete
                     entry.State = EntityState.Modified;
                     entity.IsDeleted = true;
-                    entity.DeletedAt = DateTime.UtcNow;
+                    entity.DeletedAt = DateTime.Now;
                 }
             }
 

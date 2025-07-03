@@ -33,7 +33,7 @@ namespace ShipConnect.CQRS.ResetPassword.Commands
             var codeEntry = await _unitOfWork.PasswordResetCodeRepository
                 .GetFirstOrDefaultAsync(x => x.Email == request.Email && x.Code == request.Code);
 
-            if (codeEntry == null || codeEntry.IsUsed || codeEntry.ExpirationDate < DateTime.UtcNow)
+            if (codeEntry == null || codeEntry.IsUsed || codeEntry.ExpirationDate < DateTime.Now)
                 return GeneralResponse<string>.FailResponse("Invalid or expired code");
 
             var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);

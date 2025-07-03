@@ -28,7 +28,7 @@ namespace ShipConnect.CQRS.ForgetPassword
                 return GeneralResponse<string>.FailResponse("Invalid or expired code");
 
 
-            if ((DateTime.UtcNow - codeEntry.CreatedAt).TotalMinutes > 10)
+            if ((DateTime.Now - codeEntry.CreatedAt).TotalMinutes > 10)
                 return GeneralResponse<string>.FailResponse("Code expired");
             return GeneralResponse<string>.SuccessResponse("Code verified successfully");
         }

@@ -14,7 +14,7 @@ namespace ShipConnect.CQRS.Register.Commands
         public string Email { get; set; }
         public string Phone { get; set; }
         public string Password { get; set; }
-        public string City { get; set; }
+        //public string City { get; set; }
         public string Address { get; set; }
         public string BusinessCategory { get; set; }
         public string? Description { get; set; }
@@ -82,7 +82,7 @@ namespace ShipConnect.CQRS.Register.Commands
             {
                 CompanyName = request.CompanyName,
                 Address = request.Address,
-                City = request.City,
+                //City = request.City,
                 BusinessCategory = request.BusinessCategory,
                 Phone = request.Phone,
                 Description = request.Description,

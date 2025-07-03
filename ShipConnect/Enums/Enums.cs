@@ -16,6 +16,13 @@
             Air       // جوي
         }
 
+        public enum PackagingOptions
+        {
+            Standard,
+            FragileProtection ,
+            ThermalPackaging,
+            Other
+        }
         public enum ShippingScope
         {
             Domestic,     // داخلي
