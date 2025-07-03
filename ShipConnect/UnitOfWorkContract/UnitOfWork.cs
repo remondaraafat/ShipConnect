@@ -12,13 +12,15 @@ namespace ShipConnect.UnitOfWorkContract
         private IChatMessageRepository _chatMessageRepository;
         private INotificationRepository _notificationRepository;
         private IPaymentRepository _paymentRepository;
-        private IRatingRepository _ratingRepository;
         private IOfferRepository _offerRepository;
         private IReceiverRepository _receiverRepository;
         private IShipmentRepository _shipmentRepository;
         private IShippingCompanyRepository _shippingCompanyRepository;
         private IStartUpRepository _startUpRepository;
         private ITrackingRepository _trackingRepository;
+        private IRatingRepository _RatingRepository;
+
+
         private IPasswordResetCodeRepository _passwordResetCodeRepository;
 
         public UnitOfWork(ShipConnectContext context)
@@ -129,11 +131,18 @@ namespace ShipConnect.UnitOfWorkContract
         {
             get
             {
-                if (_ratingRepository == null)
-                    _ratingRepository = new RatingRepository(_context);
-                return _ratingRepository;
+                if (_RatingRepository == null)
+                    _RatingRepository = new RatingRepository(_context);
+                return _RatingRepository;
             }
         }
+
+
+
+
+
+
+
 
         public IPasswordResetCodeRepository PasswordResetCodeRepository
         {

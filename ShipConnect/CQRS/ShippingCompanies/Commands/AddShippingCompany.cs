@@ -1,11 +1,12 @@
 ﻿using MediatR;
 using ShipConnect.Models;
 using ShipConnect.DTOs.ShippingCompanies;
+using ShipConnect.Helpers;
 using ShipConnect.UnitOfWorkContract;
 
 namespace ShipConnect.ShippingCompanies.Commands
 {
-    public class CreateShippingCompanyCommand : IRequest<ShippingCompanyDto>
+    public class CreateShippingCompanyCommand : IRequest<GeneralResponse<ShippingCompanyDto>>
     {
         public CreateShippingCompanyDto Dto { get; set; }
 
@@ -15,8 +16,7 @@ namespace ShipConnect.ShippingCompanies.Commands
         }
     }
 
-
-    public class CreateShippingCompanyHandler : IRequestHandler<CreateShippingCompanyCommand, ShippingCompanyDto>
+    public class CreateShippingCompanyHandler : IRequestHandler<CreateShippingCompanyCommand, GeneralResponse<ShippingCompanyDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -25,7 +25,7 @@ namespace ShipConnect.ShippingCompanies.Commands
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<ShippingCompanyDto> Handle(CreateShippingCompanyCommand request, CancellationToken cancellationToken)
+        public async Task<GeneralResponse<ShippingCompanyDto>> Handle(CreateShippingCompanyCommand request, CancellationToken cancellationToken)
         {
             var entity = new ShippingCompany
             {
@@ -39,13 +39,14 @@ namespace ShipConnect.ShippingCompanies.Commands
                 UserId = request.Dto.UserId,
                 TransportType = request.Dto.TransportType,
                 ShippingScope = request.Dto.ShippingScope,
-                TaxId = request.Dto.TaxId
+                TaxId = request.Dto.TaxId,
+                CreatedAt = DateTime.UtcNow
             };
 
             await _unitOfWork.ShippingCompanyRepository.AddAsync(entity);
             await _unitOfWork.SaveAsync();
 
-            return new ShippingCompanyDto
+            var dto = new ShippingCompanyDto
             {
                 Id = entity.Id,
                 CompanyName = entity.CompanyName,
@@ -60,7 +61,8 @@ namespace ShipConnect.ShippingCompanies.Commands
                 ShippingScope = entity.ShippingScope,
                 TaxId = entity.TaxId
             };
+
+            return GeneralResponse<ShippingCompanyDto>.SuccessResponse("Shipping company created successfully", dto);
         }
     }
-
 }

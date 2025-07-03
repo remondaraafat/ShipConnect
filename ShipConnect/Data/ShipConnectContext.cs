@@ -85,8 +85,7 @@ namespace ShipConnect.Data
 
                 if (entry.State == EntityState.Added)
                 {
-                    entity.CreatedAt = DateTime.
-                        ;
+                    entity.CreatedAt = DateTime.Now;
                 }
 
                 if (entry.State == EntityState.Modified)

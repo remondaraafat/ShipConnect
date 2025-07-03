@@ -18,6 +18,8 @@ namespace ShipConnect.UnitOfWorkContract
         ITrackingRepository TrackingRepository { get; }
         IPasswordResetCodeRepository PasswordResetCodeRepository { get; }
 
+
+
         Task SaveAsync();
     }
 }

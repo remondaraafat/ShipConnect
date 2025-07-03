@@ -1,13 +1,15 @@
 ﻿using MediatR;
 using ShipConnect.DTOs.ShippingCompanies;
+using ShipConnect.Helpers;
 using ShipConnect.UnitOfWorkContract;
 
 namespace ShipConnect.ShippingCompanies.Commands
 {
-    public class UpdateShippingCompanyCommand : IRequest<ShippingCompanyDto>
+    public class UpdateShippingCompanyCommand : IRequest<GeneralResponse<ShippingCompanyDto>>
     {
         public int Id { get; set; }
         public CreateShippingCompanyDto Dto { get; set; }
+
         public UpdateShippingCompanyCommand(int id, CreateShippingCompanyDto dto)
         {
             Id = id;
@@ -15,7 +17,7 @@ namespace ShipConnect.ShippingCompanies.Commands
         }
     }
 
-    public class UpdateShippingCompanyHandler : IRequestHandler<UpdateShippingCompanyCommand, ShippingCompanyDto>
+    public class UpdateShippingCompanyHandler : IRequestHandler<UpdateShippingCompanyCommand, GeneralResponse<ShippingCompanyDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -24,10 +26,13 @@ namespace ShipConnect.ShippingCompanies.Commands
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<ShippingCompanyDto> Handle(UpdateShippingCompanyCommand request, CancellationToken cancellationToken)
+        public async Task<GeneralResponse<ShippingCompanyDto>> Handle(UpdateShippingCompanyCommand request, CancellationToken cancellationToken)
         {
             var entity = await _unitOfWork.ShippingCompanyRepository.GetByIdAsync(request.Id);
-            if (entity == null) return null!;
+            if (entity == null)
+            {
+                return GeneralResponse<ShippingCompanyDto>.FailResponse("Shipping company not found");
+            }
 
             entity.CompanyName = request.Dto.CompanyName;
             entity.Description = request.Dto.Description;
@@ -44,7 +49,7 @@ namespace ShipConnect.ShippingCompanies.Commands
             _unitOfWork.ShippingCompanyRepository.Update(entity);
             await _unitOfWork.SaveAsync();
 
-            return new ShippingCompanyDto
+            var dto = new ShippingCompanyDto
             {
                 Id = entity.Id,
                 CompanyName = entity.CompanyName,
@@ -59,9 +64,8 @@ namespace ShipConnect.ShippingCompanies.Commands
                 ShippingScope = entity.ShippingScope,
                 TaxId = entity.TaxId
             };
+
+            return GeneralResponse<ShippingCompanyDto>.SuccessResponse("Shipping company updated successfully", dto);
         }
     }
-
-
-
 }

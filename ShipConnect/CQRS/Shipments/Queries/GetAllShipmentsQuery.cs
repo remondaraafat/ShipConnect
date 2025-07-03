@@ -23,16 +23,16 @@ namespace ShipConnect.CQRS.Shipments.Queries
         public async Task<GeneralResponse<GetDataResult<List<GetAllShipmentsDTO>>>> Handle(GetAllShipmentsQuery request, CancellationToken cancellationToken)
         {
             var startUp = await UnitOfWork.StartUpRepository.GetFirstOrDefaultAsync(s => s.UserId == request.UserId);
-            
+
             if (startUp == null)
                 return GeneralResponse<GetDataResult<List<GetAllShipmentsDTO>>>.FailResponse("Startup not found");
 
-            var query = UnitOfWork.ShipmentRepository.GetWithFilterAsync(sh => sh.StartupId == startUp.Id);
-            
-            //var totalCount = query.
+            var query = UnitOfWork.ShipmentRepository.GetWithFilterAsync(sh => sh.StartupId == startUp.Id).OrderByDescending(c=>c.SentDate);
 
-            
+            var shipment = query.Skip(request.PageNumber - 1);
+            int totalCount = query.Count();
+
+            return GeneralResponse<GetDataResult<List<GetAllShipmentsDTO>>>.FailResponse("Startup not found");
         }
     }
-
 }

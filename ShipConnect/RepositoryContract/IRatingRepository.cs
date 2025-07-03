@@ -4,5 +4,6 @@ namespace ShipConnect.RepositoryContract
 {
     public interface IRatingRepository:IGenericRepository<Rating>
     {
+
     }
 }

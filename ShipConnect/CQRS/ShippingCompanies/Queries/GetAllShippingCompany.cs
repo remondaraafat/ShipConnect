@@ -1,14 +1,13 @@
 ﻿using MediatR;
 using ShipConnect.DTOs.ShippingCompanies;
+using ShipConnect.Helpers;
 using ShipConnect.UnitOfWorkContract;
 
 namespace ShipConnect.ShippingCompanies.Querys
 {
-    public class GetAllShippingCompaniesQuery : IRequest<List<ShippingCompanyDto>> { }
+    public class GetAllShippingCompaniesQuery : IRequest<GeneralResponse<List<ShippingCompanyDto>>> { }
 
-
-
-    public class GetAllShippingCompaniesHandler : IRequestHandler<GetAllShippingCompaniesQuery, List<ShippingCompanyDto>>
+    public class GetAllShippingCompaniesHandler : IRequestHandler<GetAllShippingCompaniesQuery, GeneralResponse<List<ShippingCompanyDto>>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -17,11 +16,11 @@ namespace ShipConnect.ShippingCompanies.Querys
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<ShippingCompanyDto>> Handle(GetAllShippingCompaniesQuery request, CancellationToken cancellationToken)
+        public async Task<GeneralResponse<List<ShippingCompanyDto>>> Handle(GetAllShippingCompaniesQuery request, CancellationToken cancellationToken)
         {
-            var query = await _unitOfWork.ShippingCompanyRepository.GetAllAsync();
+            
 
-            var result = query.Select(entity => new ShippingCompanyDto
+            var result = _unitOfWork.ShippingCompanyRepository.GetAllAsync().Select(entity => new ShippingCompanyDto
             {
                 Id = entity.Id,
                 CompanyName = entity.CompanyName,
@@ -37,8 +36,7 @@ namespace ShipConnect.ShippingCompanies.Querys
                 TaxId = entity.TaxId
             }).ToList();
 
-            return result;
+            return GeneralResponse<List<ShippingCompanyDto>>.SuccessResponse("All shipping companies fetched successfully", result);
         }
     }
-
 }
