@@ -22,10 +22,10 @@ namespace ShipConnect.CQRS.Offers.Queries
 
         public async Task<GeneralResponse<List<ReadOfferDto>>> Handle(GetOffersByShipmentIdQuery request, CancellationToken cancellationToken)
         {
-            var offers = await _unitOfWork.OfferRepository
-                .GetWithFilterAsync(o => o.ShipmentId == request.ShipmentId);
+            
 
-            var data = offers.Select(o => new ReadOfferDto
+            var data = _unitOfWork.OfferRepository
+                .GetWithFilterAsync(o => o.ShipmentId == request.ShipmentId).Select(o => new ReadOfferDto
             {
                 Id = o.Id,
                 Price = o.Price,

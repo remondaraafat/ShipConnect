@@ -26,7 +26,7 @@ namespace ShipConnect.CQRS.Offers.Queries
 
         public async Task<GeneralResponse<OfferStatsDto>> Handle(GetOfferStatsByCompanyIdQuery request, CancellationToken cancellationToken)
         {
-            var offers = await _unitOfWork.OfferRepository.GetWithFilterAsync(
+            var offers =  _unitOfWork.OfferRepository.GetWithFilterAsync(
                 o => o.ShippingCompanyId == request.ShippingCompanyId
             );
 

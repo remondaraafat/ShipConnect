@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using ShipConnect.Models;
 
 
@@ -13,13 +14,14 @@ namespace ShipConnect.CQRS.RoleCQRS.Command
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
-       
+        private readonly IEmailService emailService;
 
-        public AssignRoleToUserCommandHandler(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public AssignRoleToUserCommandHandler(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IEmailService emailService)
         {
             this.userManager = userManager;
             
             this.roleManager = roleManager;
+            this.emailService = emailService;   
         }
         public async Task<GeneralResponse<string>> Handle(AssignRoleToUserCommand request, CancellationToken cancellationToken)
         {
@@ -40,6 +42,21 @@ namespace ShipConnect.CQRS.RoleCQRS.Command
             var result = await userManager.AddToRoleAsync(user, request.DTO.RoleName.ToString());
             if (result.Succeeded)
             {
+                if (request.DTO.RoleName==UserRole.Admin)
+                {
+                    try
+                    {
+                        await emailService.SendEmailAsync(user.Email,
+                        "You have been assigned the Admin role",
+                        "<p>Congratulations 🎉,<br>You're now an Admin on ShipConnect.</p>");
+                    }
+                    catch (Exception ex)
+                    {
+                        
+                        //logger.LogError(ex, "Failed sending Admin role email to {Email}", user.Email);
+                        
+                    }
+                }
                 return GeneralResponse<string>.SuccessResponse("Role assigned to user successfully.");
             }
             var errors = string.Join(" | ", result.Errors.Select(e => e.Description));

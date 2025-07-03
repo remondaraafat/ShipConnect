@@ -18,9 +18,9 @@ namespace ShipConnect.ShippingCompanies.Querys
 
         public async Task<GeneralResponse<List<ShippingCompanyDto>>> Handle(GetAllShippingCompaniesQuery request, CancellationToken cancellationToken)
         {
-            var query = await _unitOfWork.ShippingCompanyRepository.GetAllAsync();
+            
 
-            var result = query.Select(entity => new ShippingCompanyDto
+            var result = _unitOfWork.ShippingCompanyRepository.GetAllAsync().Select(entity => new ShippingCompanyDto
             {
                 Id = entity.Id,
                 CompanyName = entity.CompanyName,

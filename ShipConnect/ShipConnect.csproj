@@ -31,7 +31,6 @@
     <Folder Include="CQRS\Register\Queries\" />
     <Folder Include="CQRS\Shipments\Commands\" />
     <Folder Include="CQRS\Shipments\Queries\" />
-    <Folder Include="CQRS\StartUps\Queries\" />
     <Folder Include="CQRS\Tracking\Commands\" />
     <Folder Include="CQRS\Tracking\Queries\" />
     <Folder Include="DTOs\TrackingDTOs\" />

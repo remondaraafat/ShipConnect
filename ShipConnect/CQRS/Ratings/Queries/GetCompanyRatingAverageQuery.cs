@@ -22,8 +22,8 @@ namespace ShipConnect.CQRS.Ratings.Queries
 
         public async Task<GeneralResponse<double?>> Handle(GetCompanyRatingAverageQuery request, CancellationToken cancellationToken)
         {
-            var allRatings = await _unitOfWork.RatingRepository.GetAllAsync();
-            var companyRatings = allRatings.Where(r => r.CompanyId == request.CompanyId);
+            
+            var companyRatings = _unitOfWork.RatingRepository.GetAllAsync().Where(r => r.CompanyId == request.CompanyId);
 
             if (!companyRatings.Any())
                 return GeneralResponse<double?>.FailResponse("No ratings found for this company");

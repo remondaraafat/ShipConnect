@@ -19,8 +19,8 @@ namespace ShipConnect.CQRS.Offers.Queries
 
         public async Task<GeneralResponse<int>> Handle(GetTotalOffersCountQuery request, CancellationToken cancellationToken)
         {
-            var allOffers = await _unitOfWork.OfferRepository.GetAllAsync();
-            int count = allOffers.Count();
+            
+            int count = _unitOfWork.OfferRepository.GetAllAsync().Count();
 
             return GeneralResponse<int>.SuccessResponse("Total offers counted successfully", count);
         }

@@ -27,10 +27,10 @@ namespace ShipConnect.CQRS.ShippingCompanies.Queries
 
         public async Task<GeneralResponse<List<ShippingCompanyDto>>> Handle(SearchShippingCompaniesByNameQuery request, CancellationToken cancellationToken)
         {
-            var companies = await _unitOfWork.ShippingCompanyRepository
-                .GetWithFilterAsync(c => c.CompanyName.ToLower().Contains(request.Name.ToLower()));
+           
 
-            var result = companies.Select(c => new ShippingCompanyDto
+            var result = _unitOfWork.ShippingCompanyRepository
+                .GetWithFilterAsync(c => c.CompanyName.ToLower().Contains(request.Name.ToLower())).Select(c => new ShippingCompanyDto
             {
                 Id = c.Id,
                 CompanyName = c.CompanyName,

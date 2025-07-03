@@ -22,9 +22,9 @@ namespace ShipConnect.CQRS.Ratings.Queries
 
         public async Task<GeneralResponse<List<ReadRatingDto>>> Handle(GetRatingsByCompanyIdQuery request, CancellationToken cancellationToken)
         {
-            var ratings = await _unitOfWork.RatingRepository.GetWithFilterAsync(r => r.CompanyId == request.CompanyId);
+            
 
-            var dtoList = ratings.Select(r => new ReadRatingDto
+            var dtoList = _unitOfWork.RatingRepository.GetWithFilterAsync(r => r.CompanyId == request.CompanyId).Select(r => new ReadRatingDto
             {
                 Id = r.Id,
                 StartUpId = r.StartUpId,
