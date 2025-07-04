@@ -5,6 +5,7 @@ namespace ShipConnect.UnitOfWorkContract
 {
     public interface IUnitOfWork : IDisposable
     {
+        IApplicationUserRepository ApplicationUserRepository { get; }
         IBankAccountRepository BankAccountRepository { get; }
         IChatMessageRepository ChatMessageRepository { get; }
         INotificationRepository NotificationRepository { get; }

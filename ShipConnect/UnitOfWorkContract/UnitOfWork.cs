@@ -8,6 +8,7 @@ namespace ShipConnect.UnitOfWorkContract
     {
         private readonly ShipConnectContext _context;
 
+        private IApplicationUserRepository _applicationUserRepository;
         private IBankAccountRepository _bankAccountRepository;
         private IChatMessageRepository _chatMessageRepository;
         private INotificationRepository _notificationRepository;
@@ -27,7 +28,16 @@ namespace ShipConnect.UnitOfWorkContract
         {
             _context = context;
         }
-
+        public IApplicationUserRepository ApplicationUserRepository
+        {
+            get
+            {
+                if (_applicationUserRepository == null)
+                    _applicationUserRepository = new ApplicationUserRepository(_context);
+                return _applicationUserRepository;
+            }
+        }
+        
         public IOfferRepository OfferRepository
         {
             get

@@ -57,7 +57,7 @@ namespace ShipConnect.CQRS.Register.Commands
                 UserName = request.Email,
                 Email = request.Email,
                 PhoneNumber = request.Phone,
-                CompanyName=request.CompanyName
+                Name=request.CompanyName
             };
             
             IdentityResult result= await UserManager.CreateAsync(user,request.Password);

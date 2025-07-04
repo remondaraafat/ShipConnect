@@ -6,7 +6,7 @@ namespace ShipConnect.Models
 {
     public class ApplicationUser:IdentityUser
     {
-        public string CompanyName {  get; set; }
+        public string Name {  get; set; }
         public string ProfileImageUrl { get; set; }="/images/default-user.png";//default image
         public bool IsActive { get; set; } = true;  //لو الادمن عاوز يعمل تعطيل لحساب المستخدم
         public StartUp? Startup { get; set; }
