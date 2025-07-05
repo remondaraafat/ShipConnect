@@ -25,18 +25,18 @@ namespace ShipConnect.CQRS.Shipments.Queries
         public async Task<GeneralResponse<int>> Handle(StartUpShipmentStatusCountQuery request, CancellationToken cancellationToken)
         {
             var startUp = await UnitOfWork.StartUpRepository.GetFirstOrDefaultAsync(s => s.UserId == request.UserId);
-            if (startUp == null) 
+            if (startUp == null)
                 return GeneralResponse<int>.FailResponse("Startup not found for current user");
 
             int ShipmentCount = -1;
-            if(Enum.IsDefined(typeof(ShipmentStatus),request.ShipmentStatus))//بيتاكد هل القيمة موجودة فعليا ولا
+            if (Enum.IsDefined(typeof(ShipmentStatus), request.ShipmentStatus))//بيتاكد هل القيمة موجودة فعليا ولا
             {
                 ShipmentStatus status = (ShipmentStatus)request.ShipmentStatus;
 
                 ShipmentCount = await UnitOfWork.ShipmentRepository.CountAsync(s => s.Status == status && s.StartupId == startUp.Id);
                 return GeneralResponse<int>.SuccessResponse($"{status} Shipment Count", ShipmentCount);
             }
-                
+
             ShipmentCount = await UnitOfWork.ShipmentRepository.CountAsync(s => s.StartupId == startUp.Id);
             return GeneralResponse<int>.SuccessResponse("Total Shipment Count", ShipmentCount);
         }

@@ -2,28 +2,28 @@
 
 namespace ShipConnect.CQRS.Shipments.Queries
 {
-    public class ShippingCompanyStatusCountQuery : IRequest<GeneralResponse<GetAllStatusCountDTO>>
+    public class AdminShippingStatusCountQuery : IRequest<GeneralResponse<GetAllStatusCountDTO>>
     {
-        public string UserId { get; set; }
+        public int ShippingCompanyID { get; set; }
     }
 
-    public class ShippingCompanyStatusCountQueryHandler : IRequestHandler<ShippingCompanyStatusCountQuery, GeneralResponse<GetAllStatusCountDTO>>
+    public class AdminShippingStatusCountQueryHandler : IRequestHandler<AdminShippingStatusCountQuery, GeneralResponse<GetAllStatusCountDTO>>
     {
         public IUnitOfWork UnitOfWork { get; }
 
-        public ShippingCompanyStatusCountQueryHandler(IUnitOfWork unitOfWork)
+        public AdminShippingStatusCountQueryHandler(IUnitOfWork unitOfWork)
         {
             UnitOfWork = unitOfWork;
         }
 
-        public async Task<GeneralResponse<GetAllStatusCountDTO>> Handle(ShippingCompanyStatusCountQuery request, CancellationToken cancellationToken)
+        public async Task<GeneralResponse<GetAllStatusCountDTO>> Handle(AdminShippingStatusCountQuery request, CancellationToken cancellationToken)
         {
-            var company = await UnitOfWork.ShippingCompanyRepository.GetFirstOrDefaultAsync(s => s.UserId == request.UserId);
+            var company = await UnitOfWork.ShippingCompanyRepository.GetFirstOrDefaultAsync(s => s.Id == request.ShippingCompanyID);
 
             if (company == null)
                 return GeneralResponse<GetAllStatusCountDTO>.FailResponse("Shipping Company not found");
 
-            var Shipments = UnitOfWork.OfferRepository.GetWithFilterAsync(o => o.ShippingCompanyId == company.Id && o.IsAccepted==true).Select(s=>s.Shipment);
+            var Shipments = UnitOfWork.OfferRepository.GetWithFilterAsync(o => o.ShippingCompanyId == company.Id && o.IsAccepted == true).Select(s => s.Shipment);
             if (Shipments == null)
                 return GeneralResponse<GetAllStatusCountDTO>.FailResponse("No shipments found for this company");
 
@@ -42,5 +42,4 @@ namespace ShipConnect.CQRS.Shipments.Queries
             return GeneralResponse<GetAllStatusCountDTO>.SuccessResponse("All Shipments status count retrieved successfully", data);
         }
     }
-
 }

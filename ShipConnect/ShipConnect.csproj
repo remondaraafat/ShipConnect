@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="CQRS\Register\Queries\**" />
+    <Content Remove="CQRS\Register\Queries\**" />
+    <EmbeddedResource Remove="CQRS\Register\Queries\**" />
+    <None Remove="CQRS\Register\Queries\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
     <PackageReference Include="MailKit" Version="4.13.0" />
@@ -28,7 +35,6 @@
   <ItemGroup>
     <Folder Include="CQRS\Offers\Commands\" />
     <Folder Include="CQRS\Offers\Queries\" />
-    <Folder Include="CQRS\Register\Queries\" />
     <Folder Include="CQRS\Shipments\Commands\" />
     <Folder Include="CQRS\Tracking\Commands\" />
     <Folder Include="CQRS\Tracking\Queries\" />
