@@ -27,12 +27,33 @@ namespace ShipConnect.CQRS.Shipments.Queries
             if (startUp == null)
                 return GeneralResponse<GetDataResult<List<GetAllShipmentsDTO>>>.FailResponse("Startup not found");
 
-            var query = UnitOfWork.ShipmentRepository.GetWithFilterAsync(sh => sh.StartupId == startUp.Id).OrderByDescending(c=>c.SentDate);
-
-            var shipment = query.Skip(request.PageNumber - 1);
+            var query = UnitOfWork.ShipmentRepository.GetWithFilterAsync(sh => sh.StartupId == startUp.Id);
+                                                    
             int totalCount = query.Count();
 
-            return GeneralResponse<GetDataResult<List<GetAllShipmentsDTO>>>.FailResponse("Startup not found");
+            var shipments = query.OrderByDescending(c => c.SentDate)
+                                                    .Skip((request.PageNumber - 1) * request.PageSize)
+                                                    .Take(request.PageSize)
+                                                    .ToList();
+
+            var result = shipments.Select(q => new GetAllShipmentsDTO
+            {
+                Id = q.Id,
+                Code = q.Code,
+                Status = q.Status.ToString(),
+                RequestedPickupDate = q.RequestedPickupDate,
+            }).ToList();
+
+            var dataResult = new GetDataResult<List<GetAllShipmentsDTO>>
+            {
+                Data = result,
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            };
+
+            return GeneralResponse<GetDataResult<List<GetAllShipmentsDTO>>>.SuccessResponse("Get All Shipment data retrieved successfuly",dataResult);
         }
     }
+
 }

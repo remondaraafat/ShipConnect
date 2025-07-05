@@ -50,7 +50,7 @@ namespace ShipConnect.Models
         [ForeignKey("StartupId")]
         public StartUp? Startup { get; set; }
 
-        public ICollection<Tracking> Trackings { get; set; }
+        //public ICollection<Tracking> Trackings { get; set; }
         public ICollection<Offer> Offers { get; set; }
         public ICollection<ChatMessage> ChatMessages { get; set; }
         public ICollection<Payment> Payments { get; set; }

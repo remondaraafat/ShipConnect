@@ -2,7 +2,7 @@
 
 namespace ShipConnect.RepositoryContract
 {
-    public interface ITrackingRepository:IGenericRepository<Tracking>
-    {
-    }
+    //public interface ITrackingRepository:IGenericRepository<Tracking>
+    //{
+    //}
 }

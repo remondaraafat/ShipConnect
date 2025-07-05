@@ -28,7 +28,7 @@ namespace ShipConnect.Models
 
         public ICollection<Offer> ShippingOffers { get; set; }
         //public ICollection<ChatMessage> SentMessages { get; set; } 
-        public ICollection<Tracking> Trackings { get; set; }
+        //public ICollection<Tracking> Trackings { get; set; }
         public ICollection<Rating> Ratings { get; set; } 
     }
 }

@@ -16,7 +16,7 @@ namespace ShipConnect.UnitOfWorkContract
         IShipmentRepository ShipmentRepository { get; }
         IShippingCompanyRepository ShippingCompanyRepository { get; }
         IStartUpRepository StartUpRepository { get; }
-        ITrackingRepository TrackingRepository { get; }
+        //ITrackingRepository TrackingRepository { get; }
         IPasswordResetCodeRepository PasswordResetCodeRepository { get; }
 
 

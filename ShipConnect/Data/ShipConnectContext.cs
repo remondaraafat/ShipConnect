@@ -20,7 +20,7 @@ namespace ShipConnect.Data
         public DbSet<Shipment> Shipments { get; set; }
         public DbSet<ShippingCompany> ShippingCompanies { get; set; }
         public DbSet<StartUp> StartUps { get; set; }
-        public DbSet<Tracking> Trackings { get; set; }
+        //public DbSet<Tracking> Trackings { get; set; }
         public DbSet<PasswordResetCode> PasswordResetCodes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

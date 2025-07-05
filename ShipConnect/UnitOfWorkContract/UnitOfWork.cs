@@ -18,7 +18,7 @@ namespace ShipConnect.UnitOfWorkContract
         private IShipmentRepository _shipmentRepository;
         private IShippingCompanyRepository _shippingCompanyRepository;
         private IStartUpRepository _startUpRepository;
-        private ITrackingRepository _trackingRepository;
+        //private ITrackingRepository _trackingRepository;
         private IRatingRepository _RatingRepository;
 
 
@@ -87,15 +87,15 @@ namespace ShipConnect.UnitOfWorkContract
             }
         }
 
-        public ITrackingRepository TrackingRepository
-        {
-            get
-            {
-                if (_trackingRepository == null)
-                    _trackingRepository = new TrackingRepository(_context);
-                return _trackingRepository;
-            }
-        }
+        //public ITrackingRepository TrackingRepository
+        //{
+        //    get
+        //    {
+        //        if (_trackingRepository == null)
+        //            _trackingRepository = new TrackingRepository(_context);
+        //        return _trackingRepository;
+        //    }
+        //}
 
         public IBankAccountRepository BankAccountRepository
         {
