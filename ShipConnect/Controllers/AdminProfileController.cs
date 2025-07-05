@@ -37,7 +37,7 @@ namespace ShipConnect.Controllers
             return GeneralResponse<GetUserDTO>.SuccessResponse("Profile loaded successfully.", userDto);
         }
         //edit
-        [HttpPut("edit-profile")]
+        [HttpPut]
         public async Task<GeneralResponse<object>> EditMyProfile(
         [FromBody] EditUserDTO dto,
         CancellationToken cancellationToken)

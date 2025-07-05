@@ -16,7 +16,7 @@ namespace ShipConnect.Controllers
         public StartUpController(IMediator mediator) => _mediator = mediator;
         //get by email
         [Authorize]
-        [HttpGet("by-email")]
+        [HttpGet]
         public async Task<IActionResult> GetStartupProfileByEmail(
         [FromQuery] string email,
         CancellationToken cancellationToken)
@@ -56,7 +56,7 @@ namespace ShipConnect.Controllers
         }
         // PUT api/profile/update-my
         [Authorize]
-        [HttpPut("update-my")]
+        [HttpPut]
         public async Task<GeneralResponse<object>> UpdateMyStartupProfile(
             [FromBody] UpdateFullProfileDTO requestDto,
             CancellationToken cancellationToken)
