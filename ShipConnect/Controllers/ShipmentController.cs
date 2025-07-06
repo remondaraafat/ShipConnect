@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ShipConnect.CQRS.shipments.Queries;
 using ShipConnect.CQRS.Shipments.Commands;
 using ShipConnect.CQRS.Shipments.Queries;
 using ShipConnect.DTOs.ShipmentDTOs;
@@ -23,27 +24,14 @@ namespace ShipConnect.Controllers
             this._mediator = mediator;
         }
 
-        [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAllShipments(int pageNumber = 1,  int pageSize = 10)
+        #region ShippingCompany
+
+        [Authorize(Roles = "ShippingCompany")]
+        [HttpGet("ShippingCompany/Id/{Id:int}")]
+        public async Task<IActionResult> GetShippingShipmentById(int Id)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var query = new GetAllShipmentsQuery
-            {
-                UserId = userId,
-                PageNumber = pageNumber,
-                PageSize = pageSize
-            };
-
-            var result = await _mediator.Send(query);
-
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
-
-        [HttpGet("GetById/{Id:int}")]
-        public async Task<IActionResult> GetShipmentById(int Id)
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var query = new GetShipmentByIdQuery
+            var query = new GetShippingShipmentByIdQuery
             {
                 UserId = userId,
                 ShipmentId = Id,
@@ -53,54 +41,29 @@ namespace ShipConnect.Controllers
 
             return result.Success ? Ok(result) : BadRequest(result);
         }
+        #endregion
 
-        [HttpGet("GetAllWithStatus/{status:int}")]
-        public async Task<IActionResult> GetShipmentsWithStatus(int status,int pageNumber = 1, int pageSize = 10)
+
+        #region StartUp 
+
+        [Authorize(Roles = "Startup")]
+        [HttpGet("Count/{Status:int}")]
+        public async Task<IActionResult> ShipmentStatusCountStartUp(int Status = -1)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var query = new GetShipmentsWithStatusQuery
+
+            var query = new StartUpShipmentStatusCountQuery
             {
                 UserId = userId,
-                Status = status,
-                PageNumber = pageNumber,
-                PageSize = pageSize
+                ShipmentStatus = Status
             };
 
             var result = await _mediator.Send(query);
-
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        [HttpGet("ShipmentCode/{code}")]
-        public async Task<IActionResult> GetShipmentWithCode(string code)
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var query = new GetShipmentWithCodeQuery
-            {
-                UserId = userId,
-                Code = code,
-            };
-
-            var result = await _mediator.Send(query);
-
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
-
-        [HttpGet("startUp/StatusCount")]
-        public async Task<IActionResult> StartUpStatusCount()
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var query = new GetAllStatusCountQuery
-            {
-                UserId = userId,
-            };
-
-            var result = await _mediator.Send(query);
-
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
-
-        [HttpGet("ShippingMethodCount")]
+        [Authorize(Roles = "Startup")]
+        [HttpGet("startUp/ShippingMethodCount")]
         public async Task<IActionResult> GetShippingMethodCount()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -114,7 +77,8 @@ namespace ShipConnect.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        [HttpGet("ShippingScopeCount")]
+        [Authorize(Roles = "Startup")]
+        [HttpGet("startUp/ShippingScopeCount")]
         public async Task<IActionResult> GetShippingScopeCount()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -128,13 +92,15 @@ namespace ShipConnect.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        [HttpGet("ShippingCompany/StatusCount")]
-        public async Task<IActionResult> ShippingCompanyStatusCount()
+        [Authorize(Roles = "Startup")]
+        [HttpGet("startUp/Id/{Id:int}")]
+        public async Task<IActionResult> GetStartUpShipmentById(int Id)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var query = new ShippingCompanyStatusCountQuery
+            var query = new GetStartUpShipmentByIdQuery
             {
                 UserId = userId,
+                ShipmentId = Id,
             };
 
             var result = await _mediator.Send(query);
@@ -142,12 +108,11 @@ namespace ShipConnect.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-
         [Authorize(Roles = "Startup")]
-        [HttpPost("addShipment")]
+        [HttpPost("startUp/add")]
         public async Task<IActionResult> Addshipment(AddShipmentDTO shipmentDTO)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var command = new AddShipmentCommand
@@ -192,7 +157,7 @@ namespace ShipConnect.Controllers
         }
 
         [Authorize(Roles = "Startup")]
-        [HttpPost("editShipment/{id:int}")]
+        [HttpPost("startUp/edit/{id:int}")]
         public async Task<IActionResult> Editshipment(int id, EditShipmentDTO shipmentDTO)
         {
             if (ModelState.IsValid)
@@ -241,36 +206,7 @@ namespace ShipConnect.Controllers
         }
 
         [Authorize(Roles = "Startup")]
-        [HttpGet("Count/{Status:int}")]
-        public async Task<IActionResult> ShipmentStatusCountStartUp(int Status = -1)
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            var query = new StartUpShipmentStatusCountQuery
-            {
-                UserId = userId,
-                ShipmentStatus = Status
-            };
-
-            var result = await _mediator.Send(query);
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
-
-        //[Authorize(Roles = "Admin")]
-        [HttpGet("CountAll/{Status:int}")]
-        public async Task<IActionResult> AllShipmentsCount(int Status = -1)
-        {
-            var query = new AllShipmentsCountQuery
-            {
-                ShipmentStatus = Status
-            };
-
-            var result = await _mediator.Send(query);
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
-
-        //[Authorize(Roles = "Startup")]
-        [HttpDelete("{id:int}")]
+        [HttpDelete("startUp/delete/{id:int}")]
         public async Task<IActionResult> DeleteShipment(int id)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -282,8 +218,150 @@ namespace ShipConnect.Controllers
             };
 
             var result = await _mediator.Send(query);
-            return result.Success ? Ok(result):BadRequest(result);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
+        #endregion
+
+
+        #region StartUp & Shipping Company 
+        [HttpGet("AllShipments")]
+        public async Task<IActionResult> GetAllShipments(int pageNumber = 1, int pageSize = 10)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var query = new GetAllShipmentsQuery
+            {
+                UserId = userId,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
+            var result = await _mediator.Send(query);
+
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpGet("filterWithCode/{code}")]
+        public async Task<IActionResult> GetShipmentWithCode(string code)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var query = new GetShipmentWithCodeQuery
+            {
+                UserId = userId,
+                Code = code,
+            };
+
+            var result = await _mediator.Send(query);
+
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpGet("filterWithStatus/{status:int}")]
+        public async Task<IActionResult> GetShipmentsWithStatus(int status, int pageNumber = 1, int pageSize = 10)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var query = new GetShipmentsWithStatusQuery
+            {
+                UserId = userId,
+                Status = status,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
+            var result = await _mediator.Send(query);
+
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpGet("StatusCount")]
+        public async Task<IActionResult> StatusCount()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var query = new GetAllStatusCountQuery
+            {
+                UserId = userId,
+            };
+
+            var result = await _mediator.Send(query);
+
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+       
+
+        #endregion
+
+
+        #region Admin
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("Admin/StatusCount")]
+        public async Task<IActionResult> AdminStatusCount()
+        {
+            var query = new AdminStatusCountQuery();
+
+            var result = await _mediator.Send(query);
+
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("Admin/ShippingCount/{shippingCompanyId:int}")]
+        public async Task<IActionResult> AdminShippingStatusCount(int shippingCompanyId)
+        {
+            var query = new AdminShippingStatusCountQuery
+            {
+                ShippingCompanyID = shippingCompanyId
+            };
+
+            var result = await _mediator.Send(query);
+
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("Admin/StatusCount/{startUpId:int}")]
+        public async Task<IActionResult> AdminStartUpStatusCount(int startUpId)
+        {
+            var query = new AdminStartUpStatusCountQuery
+            {
+                StartUpID = startUpId
+            };
+
+            var result = await _mediator.Send(query);
+
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("Admin/ShippingMethodCount/{startUpId:int}")]
+        public async Task<IActionResult> AdminStartUpShippingMethodCount(int startUpId)
+        {
+            var query = new AdminStartUpShippingMethodCountQuery
+            {
+                StartUpID = startUpId
+            };
+
+            var result = await _mediator.Send(query);
+
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("Admin/ShippingScopeCount/{startUpId:int}")]
+        public async Task<IActionResult> AdminStartUpShippingScopeCount(int startUpId)
+        {
+            var query = new AdminStartUpShippingScopeCountQuery
+            {
+                StartUpID = startUpId
+            };
+
+            var result = await _mediator.Send(query);
+
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        #endregion
+
 
 
     }

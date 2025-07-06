@@ -23,24 +23,38 @@ namespace ShipConnect.CQRS.Shipments.Queries
 
         public async Task<GeneralResponse<GetDataResult<List<GetAllShipmentsDTO>>>> Handle(GetShipmentsWithStatusQuery request, CancellationToken cancellationToken)
         {
-            var startUp = await UnitOfWork.StartUpRepository.GetFirstOrDefaultAsync(s => s.UserId == request.UserId);
+            IQueryable<Shipment> query;
 
-            if (startUp == null)
-                return GeneralResponse<GetDataResult<List<GetAllShipmentsDTO>>>.FailResponse("Startup not found");
-
-            if(!Enum.IsDefined(typeof(ShipmentStatus),request.Status))//بيتاكد هل القيمة موجودة فعليا ولا
+            if (!Enum.IsDefined(typeof(ShipmentStatus), request.Status))//بيتاكد هل القيمة موجودة فعليا ولا
                 return GeneralResponse<GetDataResult<List<GetAllShipmentsDTO>>>.FailResponse("Invalid shipment status");
 
             ShipmentStatus shipmentStatus = (ShipmentStatus)request.Status;
+            
+            var startUp = await UnitOfWork.StartUpRepository.GetFirstOrDefaultAsync(s => s.UserId == request.UserId);
+            if (startUp != null)
+            {
+                query = UnitOfWork.ShipmentRepository.GetWithFilterAsync(sh => sh.StartupId == startUp.Id && sh.Status == shipmentStatus);
+            }
+            else
+            {
+                var company = await UnitOfWork.ShippingCompanyRepository.GetFirstOrDefaultAsync(s => s.UserId == request.UserId);
+                if (company == null)
+                    return GeneralResponse<GetDataResult<List<GetAllShipmentsDTO>>>.FailResponse("Shipping Company not found");
 
-            var query = UnitOfWork.ShipmentRepository.GetWithFilterAsync(sh => sh.StartupId == startUp.Id && sh.Status == shipmentStatus);
+                query = UnitOfWork.OfferRepository.GetWithFilterAsync(o => o.ShippingCompanyId == company.Id && o.IsAccepted == true)
+                                                    .Select(s => s.Shipment!)
+                                                    .Where(s => s.Status == shipmentStatus);
+            }
 
             int totalCount = query.Count();
+            if (totalCount == 0)
+                return GeneralResponse<GetDataResult<List<GetAllShipmentsDTO>>>.FailResponse("No shipments with selected status");
 
             var shipments = query.OrderByDescending(c => c.SentDate)
                                     .Skip((request.PageNumber - 1) * request.PageSize)
                                     .Take(request.PageSize)
                                     .ToList();
+
             var result = shipments.Select(q => new GetAllShipmentsDTO
             {
                 Id = q.Id,

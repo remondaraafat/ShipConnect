@@ -2,12 +2,12 @@
 
 namespace ShipConnect.CQRS.Shipments.Queries
 {
-    public class GetShipmentByIdQuery:IRequest<GeneralResponse<GetShipmentByIdDTO>>
+    public class GetStartUpShipmentByIdQuery:IRequest<GeneralResponse<GetShipmentByIdDTO>>
     {
         public string UserId { get; set; }
         public int ShipmentId { get; set; }
     }
-    public class GetShipmentByIdQueryHandler : IRequestHandler<GetShipmentByIdQuery, GeneralResponse<GetShipmentByIdDTO>>
+    public class GetShipmentByIdQueryHandler : IRequestHandler<GetStartUpShipmentByIdQuery, GeneralResponse<GetShipmentByIdDTO>>
     {
         private readonly IUnitOfWork UnitOfWork;
 
@@ -16,8 +16,7 @@ namespace ShipConnect.CQRS.Shipments.Queries
             UnitOfWork = unitOfWork;
         }
 
-
-        public async Task<GeneralResponse<GetShipmentByIdDTO>> Handle(GetShipmentByIdQuery request, CancellationToken cancellationToken)
+        public async Task<GeneralResponse<GetShipmentByIdDTO>> Handle(GetStartUpShipmentByIdQuery request, CancellationToken cancellationToken)
         {
             var startUp = await UnitOfWork.StartUpRepository.GetFirstOrDefaultAsync(s => s.UserId == request.UserId);
 
@@ -59,7 +58,7 @@ namespace ShipConnect.CQRS.Shipments.Queries
                 ReceiverEmail = receiverData.Email??"N/A",
                 ReceiverPhone = receiverData.Phone,
                 ActualDelivery = shipment?.ActualDelivery,
-                ShippingCompanyName= acceptedOffer?.ShippingCompany?.CompanyName??"N/A",
+                CompanyName= acceptedOffer?.ShippingCompany?.CompanyName??"N/A",
             };
 
             return GeneralResponse<GetShipmentByIdDTO>.SuccessResponse($"Shipment with ID {request.ShipmentId} retrieved successfully",data);

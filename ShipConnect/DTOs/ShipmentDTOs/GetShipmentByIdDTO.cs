@@ -32,7 +32,7 @@ namespace ShipConnect.DTOs.ShipmentDTOs
         public string ReceiverPhone { get; set; } 
         public string? ReceiverEmail { get; set; }
 
-        public string? ShippingCompanyName { get; set; }
+        public string? CompanyName { get; set; }
         public DateTime? ActualDelivery { get; set; }//تاريخ التسليم الفعلي
 
 

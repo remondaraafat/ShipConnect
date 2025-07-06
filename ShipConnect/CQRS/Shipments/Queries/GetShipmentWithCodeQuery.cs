@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using ShipConnect.DTOs.ShipmentDTOs;
 using ShipConnect.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ShipConnect.CQRS.Shipments.Queries
 {
@@ -21,20 +22,35 @@ namespace ShipConnect.CQRS.Shipments.Queries
 
         public async Task<GeneralResponse<List<GetAllShipmentsDTO>>> Handle(GetShipmentWithCodeQuery request, CancellationToken cancellationToken)
         {
+            IQueryable<Shipment> query;
+
             var startUp = await UnitOfWork.StartUpRepository.GetFirstOrDefaultAsync(s => s.UserId == request.UserId);
+            if (startUp != null)
+            {
+                query = UnitOfWork.ShipmentRepository
+                            .GetWithFilterAsync(sh => sh.StartupId == startUp.Id && sh.Code.Contains(request.Code));
+            }
+            else
+            {
+                var company = await UnitOfWork.ShippingCompanyRepository.GetFirstOrDefaultAsync(s => s.UserId == request.UserId);
 
-            if (startUp == null)
-                return GeneralResponse<List<GetAllShipmentsDTO>>.FailResponse("Startup not found");
+                if (company == null)
+                    return GeneralResponse<List<GetAllShipmentsDTO>>.FailResponse("User not found");
 
-            var query = UnitOfWork.ShipmentRepository
-                            .GetWithFilterAsync(sh => sh.StartupId == startUp.Id &&sh.Code.Contains(request.Code))
-                            .OrderByDescending(o=>o.RequestedPickupDate).ToList();
+                query = UnitOfWork.OfferRepository
+                        .GetWithFilterAsync(o => o.ShippingCompanyId == company.Id && o.IsAccepted)
+                        .Select(o => o.Shipment!)
+                        .Where(s => s.Code.Contains(request.Code));
+            }
+        
             
-            if (!query.Any())
+        var shipment = query.OrderByDescending(o=>o.RequestedPickupDate).ToList();
+            
+            if (!shipment.Any())
                 return GeneralResponse<List<GetAllShipmentsDTO>>.FailResponse("No shipments found matching the code");
 
 
-            var shipment = query.Select(q => new GetAllShipmentsDTO
+            var result = shipment.Select(q => new GetAllShipmentsDTO
             {
                 Id = q.Id,
                 Code = q.Code,
@@ -42,7 +58,7 @@ namespace ShipConnect.CQRS.Shipments.Queries
                 RequestedPickupDate = q.RequestedPickupDate,
             }).ToList();
 
-            return GeneralResponse<List<GetAllShipmentsDTO>>.SuccessResponse("Get Shipment data matching with code retrieved successfuly", shipment);
+            return GeneralResponse<List<GetAllShipmentsDTO>>.SuccessResponse("Get Shipment data matching with code retrieved successfuly", result);
         }
     }
 
