@@ -24,7 +24,7 @@ namespace ShipConnect.CQRS.StartUps.Queries
                 BusinessCategory = s.BusinessCategory,
                 Description = s.Description,
                 Phone = s.User.PhoneNumber,
-                StartupName = s.User.UserName,
+                StartupName = s.User.Name,
                 Website = s.Website,
                 TaxId = s.TaxId
             }).FirstOrDefault();
