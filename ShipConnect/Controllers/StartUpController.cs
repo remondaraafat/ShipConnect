@@ -32,27 +32,27 @@ namespace ShipConnect.Controllers
         }
         //get my startup profile
         [HttpGet("me")]
-        public async Task<GeneralResponse<GetStartupByEmailDTO>> GetMyStartupProfile(CancellationToken cancellationToken)
+        public async Task<GeneralResponse<GetStartupByIdDTO>> GetMyStartupProfile(CancellationToken cancellationToken)
         {
             
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            if (string.IsNullOrEmpty(email))
+            var Id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(Id))
             {
-                return GeneralResponse<GetStartupByEmailDTO>.FailResponse(
+                return GeneralResponse<GetStartupByIdDTO>.FailResponse(
                     "Email claim is missing in token.");
             }
 
             
             var dto = await _mediator.Send(
-                new GetStartupByEmailQuery { Email = email },
+                new GetStartupByIDQuery { Id = Id },
                 cancellationToken);
 
             if (dto == null)
             {
-                return GeneralResponse<GetStartupByEmailDTO>.FailResponse("Profile not found.");
+                return GeneralResponse<GetStartupByIdDTO>.FailResponse("Profile not found.");
             }
 
-            return GeneralResponse<GetStartupByEmailDTO>.SuccessResponse("Profile loaded", dto);
+            return GeneralResponse<GetStartupByIdDTO>.SuccessResponse("Profile loaded", dto);
         }
         // PUT api/profile/update-my
         [Authorize]

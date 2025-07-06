@@ -17,17 +17,18 @@ namespace ShipConnect.CQRS.StartUps.Queries
         public async Task<GetStartupByEmailDTO> Handle(GetStartupByEmailQuery request, CancellationToken cancellationToken)
         {
            // var query = await _unitOfWork.StartUpRepository.GetWithFilterAsync(s => s.User.Email == request.Email);
-            return _unitOfWork.StartUpRepository.GetWithFilterAsync(s => s.User.Email == request.Email).Select(s => new GetStartupByEmailDTO
+            return await _unitOfWork.StartUpRepository.GetWithFilterAsync(s => s.User.Email == request.Email).Select(s => new GetStartupByEmailDTO
             {
                 Email = s.User.Email,
                 Address = s.Address,
+                ProfileImageUrl = s.User.ProfileImageUrl ?? string.Empty,
                 BusinessCategory = s.BusinessCategory,
                 Description = s.Description,
                 Phone = s.User.PhoneNumber,
                 StartupName = s.User.Name,
                 Website = s.Website,
                 TaxId = s.TaxId
-            }).FirstOrDefault();
+            }).FirstOrDefaultAsync();
         }
     }
 }
