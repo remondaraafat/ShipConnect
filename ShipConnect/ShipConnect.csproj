@@ -35,7 +35,6 @@
   <ItemGroup>
     <Folder Include="CQRS\Offers\Commands\" />
     <Folder Include="CQRS\Offers\Queries\" />
-    <Folder Include="CQRS\Shipments\Commands\" />
     <Folder Include="CQRS\Tracking\Commands\" />
     <Folder Include="CQRS\Tracking\Queries\" />
     <Folder Include="DTOs\TrackingDTOs\" />

@@ -27,7 +27,7 @@ namespace ShipConnect.Controllers
         #region ShippingCompany
 
         [Authorize(Roles = "ShippingCompany")]
-        [HttpGet("ShippingCompany/Id/{Id:int}")]
+        [HttpGet("ShippingCompany/{Id:int}")]
         public async Task<IActionResult> GetShippingShipmentById(int Id)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -41,6 +41,24 @@ namespace ShipConnect.Controllers
 
             return result.Success ? Ok(result) : BadRequest(result);
         }
+
+        [Authorize(Roles = "ShippingCompany")]
+        [HttpGet("UpdateStatus/{ShipmentId:int}")]
+        public async Task<IActionResult> UpdateShipmentStatus(int ShipmentId, int Status)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var query = new UpdateShipmentStatusCommand
+            {
+                UserId = userId,
+                ShipmentId = ShipmentId,
+                ShipmentStatus = Status,
+            };
+
+            var result = await _mediator.Send(query);
+
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
         #endregion
 
 
