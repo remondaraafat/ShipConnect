@@ -16,8 +16,8 @@ namespace ShipConnect.CQRS.UserCQRS.Commands
 
         public async Task<IdentityResult> Handle(EditUserCommand request, CancellationToken cancellationToken)
         {
-            
-            ApplicationUser user = await _unitOfWork.ApplicationUserRepository.GetFirstOrDefaultAsync(u=> u.Email==request.Email);
+
+            ApplicationUser user = await _unitOfWork.ApplicationUserRepository.GetFirstOrDefaultAsync(u => u.Email == request.Email);
             if (user == null) return IdentityResult.Failed(new IdentityError { Description = "User not found", Code = "UserNotFound" });
 
 
