@@ -1,7 +1,10 @@
-﻿using MediatR;
+﻿using System.Security.Claims;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ShipConnect.CQRS.Offers.Commands;
 using ShipConnect.CQRS.Offers.Queries;
+using ShipConnect.CQRS.Shipments.Queries;
 using ShipConnect.DTOs.OfferDTOs;
 using ShipConnect.Helpers;
 
@@ -35,15 +38,30 @@ namespace ShipConnect.Controllers
         }
 
         // POST: api/offer
+        [Authorize(Roles = "ShippingCompany")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateOfferDto dto)
         {
-            var response = await _mediator.Send(new CreateOfferCommand(dto));
-            return response.Success
-                ? CreatedAtAction(nameof(GetById), new { id = response.Data!.Id }, response)
-                : BadRequest(response);
-        }
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+            var response = await _mediator.Send(new CreateOfferCommand(userId,dto));
+            return response.Success? CreatedAtAction(nameof(GetById), new { id = response.Data!.Id }, response)
+                : BadRequest(response);
+        
+        }
+        //public async Task<IActionResult> GetShippingShipmentById(int Id)
+        //{
+        //    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    var query = new GetShippingShipmentByIdQuery
+        //    {
+        //        UserId = userId,
+        //        ShipmentId = Id,
+        //    };
+
+        //    var result = await _mediator.Send(query);
+
+        //    return result.Success ? Ok(result) : BadRequest(result);
+        //}
         // PUT: api/offer/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateOfferDto dto)

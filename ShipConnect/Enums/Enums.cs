@@ -59,6 +59,7 @@
         public enum NotificationType
         {
             General,
+            NewOffer,
             OfferAccepted,
             NewMessage,
             PaymentReceived,

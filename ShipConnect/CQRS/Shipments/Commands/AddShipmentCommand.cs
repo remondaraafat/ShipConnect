@@ -56,7 +56,7 @@ namespace ShipConnect.CQRS.Shipments.Commands
             var startUp = await UnitOfWork.StartUpRepository.GetFirstOrDefaultAsync(s => s.UserId == request.UserId);
 
             if (startUp == null)
-                return GeneralResponse<string>.FailResponse("Startup not found for current user");
+                return GeneralResponse<string>.FailResponse("UnAuthorize user");
 
             Receiver receiverData = await UnitOfWork.ReceiverRepository.GetFirstOrDefaultAsync(r => r.Phone == request.RecipientPhone);
 

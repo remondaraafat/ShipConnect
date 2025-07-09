@@ -9,6 +9,7 @@
         public bool IsAccepted { get; set; }
         public int ShipmentId { get; set; }
         public int ShippingCompanyId { get; set; }
+        public DateTime? CreatedAt { get; set; }
     }
 
 }

@@ -8,9 +8,13 @@
 
   <ItemGroup>
     <Compile Remove="CQRS\Register\Queries\**" />
+    <Compile Remove="CQRS\Tracking\**" />
     <Content Remove="CQRS\Register\Queries\**" />
+    <Content Remove="CQRS\Tracking\**" />
     <EmbeddedResource Remove="CQRS\Register\Queries\**" />
+    <EmbeddedResource Remove="CQRS\Tracking\**" />
     <None Remove="CQRS\Register\Queries\**" />
+    <None Remove="CQRS\Tracking\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,8 +39,6 @@
   <ItemGroup>
     <Folder Include="CQRS\Offers\Commands\" />
     <Folder Include="CQRS\Offers\Queries\" />
-    <Folder Include="CQRS\Tracking\Commands\" />
-    <Folder Include="CQRS\Tracking\Queries\" />
     <Folder Include="DTOs\TrackingDTOs\" />
     <Folder Include="DTOs\ShippingCompanyDTOs\" />
     <Folder Include="DTOs\ReceivderDTOs\" />

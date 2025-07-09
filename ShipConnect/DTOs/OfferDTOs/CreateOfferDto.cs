@@ -6,6 +6,5 @@
         public int EstimatedDeliveryDays { get; set; }
         public string? Notes { get; set; }
         public int ShipmentId { get; set; }
-        public int ShippingCompanyId { get; set; }
     }
 }

@@ -17,7 +17,5 @@ namespace ShipConnect.Models
 
         [ForeignKey(nameof(RecipientId))]
         public ApplicationUser Recipient { get; set; }        // اللي هيوصله الإشعار
-
-
     }
 }
