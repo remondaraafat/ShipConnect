@@ -1,46 +1,90 @@
-﻿
-using ShipConnect.DTOs.ShipmentDTOs;
+﻿using System.Text.RegularExpressions;
+using MediatR;
+using ShipConnect.CQRS.Notification.Commands;
+using ShipConnect.DTOs.NotificationDTO;
+using ShipConnect.Helpers;
+using ShipConnect.Models;
+using ShipConnect.UnitOfWorkContract;
 
 namespace ShipConnect.CQRS.Shipments.Commands
 {
-    public class UpdateShipmentStatusCommand:IRequest<GeneralResponse<string>>
+    public class UpdateShipmentStatusCommand : IRequest<GeneralResponse<string>>
     {
         public string UserId { get; set; }
         public int ShipmentId { get; set; }
         public int ShipmentStatus { get; set; }
     }
 
-    public class UpdateShipmentStatusCommandHandler : IRequestHandler<UpdateShipmentStatusCommand,GeneralResponse<string>>
+    public class UpdateShipmentStatusCommandHandler : IRequestHandler<UpdateShipmentStatusCommand, GeneralResponse<string>>
     {
-        public IUnitOfWork UnitOfWork { get; }
-        public UpdateShipmentStatusCommandHandler(IUnitOfWork unitOfWork)
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMediator _mediator;
+        private readonly IEmailService _emailService;
+
+        public UpdateShipmentStatusCommandHandler(IUnitOfWork unitOfWork, IMediator mediator, IEmailService emailService)
         {
-            UnitOfWork = unitOfWork;
+            _unitOfWork = unitOfWork;
+            _mediator = mediator;
+            _emailService = emailService;
         }
 
         public async Task<GeneralResponse<string>> Handle(UpdateShipmentStatusCommand request, CancellationToken cancellationToken)
         {
-            var company = await UnitOfWork.ShippingCompanyRepository.GetFirstOrDefaultAsync(s=>s.UserId==request.UserId);   
-            if (company == null)
+            var company = await _unitOfWork.ShippingCompanyRepository.GetFirstOrDefaultAsync(s => s.UserId == request.UserId);
+            if (company is null)
                 return GeneralResponse<string>.FailResponse("Unauthorized user");
+
+            if (!Enum.IsDefined(typeof(ShipmentStatus), request.ShipmentStatus))
+                return GeneralResponse<string>.FailResponse("Invalid shipment status value");
 
             var newStatus = (ShipmentStatus)request.ShipmentStatus;
 
-            if (!Enum.IsDefined(typeof(ShipmentStatus), newStatus))//بيتاكد هل القيمة موجودة فعليا ولا
-                return GeneralResponse<string>.FailResponse("Invalid shipment status value");
-            
-            var shipment = UnitOfWork.OfferRepository
-                                    .GetWithFilterAsync(o => o.ShippingCompanyId == company.Id
-                                    && o.ShipmentId == request.ShipmentId
-                                    && o.IsAccepted == true).Select(o=>o.Shipment).FirstOrDefault();
+            var query = _unitOfWork.OfferRepository
+                .GetWithFilterAsync(o => o.ShippingCompanyId == company.Id
+                    && o.ShipmentId == request.ShipmentId
+                    && o.IsAccepted)
+                .Select(o => new { o.Shipment, o.Shipment.Startup })
+                .FirstOrDefault();
 
-            if (shipment == null)
+            if (query is null)
                 return GeneralResponse<string>.FailResponse("Shipment not found");
 
-            shipment.Status = newStatus;
-            await UnitOfWork.SaveAsync();
+            query.Shipment.Status = newStatus;
 
-            return GeneralResponse<string>.SuccessResponse("Shipment status Updated successfully");
+            string formattedStatus = Regex.Replace(newStatus.ToString(), "(\\B[A-Z])", " $1");
+
+            var notification = new CreateNotificationDTO
+            {
+                RecipientId = query.Startup.UserId,
+                Title = newStatus == ShipmentStatus.Delivered
+                    ? "Shipment Delivered"
+                    : "Shipment Status Updated",
+                Message = newStatus == ShipmentStatus.Delivered
+                    ? $"Your shipment with code {query.Shipment.Code} has been delivered successfully."
+                    : $"Your shipment with code {query.Shipment.Code} has been updated to {formattedStatus}.",
+                NotificationType = newStatus == ShipmentStatus.Delivered
+                    ? NotificationType.ShipmentDelivered
+                    : NotificationType.ShipmentStatusChanged
+            };
+
+            await _mediator.Send(new CreateNotificationCommand(notification));
+
+            if (newStatus == ShipmentStatus.Delivered)
+            {
+                await _emailService.SendEmailAsync(
+                    toEmail: query.Startup.User.Email,
+                    subject: "Shipment Delivered",
+                    body: $@"
+                        <h2>Dear {query.Startup.User.Name},</h2>
+                        <p>We are pleased to inform you that your shipment with code <strong>{query.Shipment.Code}</strong> has been successfully delivered.</p>
+                        <p>Thank you for using <strong>ShipConnect</strong>. We hope to serve you again soon.</p>
+                        <hr />
+                        <p><em>This is an automated message. Please do not reply.</em></p>"
+                );
+            }
+
+            await _unitOfWork.SaveAsync();
+            return GeneralResponse<string>.SuccessResponse("Shipment status updated successfully");
         }
     }
 }

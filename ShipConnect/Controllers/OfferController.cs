@@ -21,13 +21,72 @@ namespace ShipConnect.Controllers
             _mediator = mediator;
         }
 
+        [Authorize(Roles = "ShippingCompany")]
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateOfferDto dto)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var response = await _mediator.Send(new CreateOfferCommand(userId, dto));
+            return response.Success ? CreatedAtAction(nameof(GetById), new { id = response.Data!.Id }, response)
+                : BadRequest(response);
+
+        }
+
+        [Authorize(Roles = "ShippingCompany")]
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateOfferDto dto)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var response = await _mediator.Send(new UpdateOfferCommand(userId, id, dto));
+            return response.Success ? Ok(response) : BadRequest(response);
+        }
+
+        [Authorize(Roles = "Startup")]
+        [HttpPut("acceptOffer/{Id:int}")]
+        public async Task<IActionResult> AcceptOffer(int Id)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var response = await _mediator.Send(new AcceptOfferCommand(userId,Id));
+            return response.Success ? Ok(response) : BadRequest(response);
+        }
+        
+        [Authorize(Roles = "ShippingCompany")]
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteOffer(int id)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var response = await _mediator.Send(new DeleteOfferCommand(userId, id));
+            return response.Success ? Ok(response) : BadRequest(response);
+        }
+
+        [Authorize(Roles = "ShippingCompany")]
+        [HttpGet("total-count")]
+        public async Task<IActionResult> GetTotalOffersStatusCount()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var response = await _mediator.Send(new GetTotalOffersCountQuery(userId));
+            return response.Success ? Ok(response) : BadRequest(response);
+        }
+
+
+
+
         // GET: api/offer/shipment/5
-        [HttpGet("shipment/{shipmentId}")]
+        [HttpGet("shipment/{shipmentId:int}")]
         public async Task<IActionResult> GetByShipmentId(int shipmentId)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
             var response = await _mediator.Send(new GetOffersByShipmentIdQuery(shipmentId));
-            return response.Success ? Ok(response) : NotFound(response);
+            return response.Success ? Ok(response) : BadRequest(response);
         }
+
+
 
         // GET: api/offer/5
         [HttpGet("{id}")]
@@ -37,46 +96,10 @@ namespace ShipConnect.Controllers
             return response.Success ? Ok(response) : NotFound(response);
         }
 
-        // POST: api/offer
-        [Authorize(Roles = "ShippingCompany")]
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateOfferDto dto)
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            var response = await _mediator.Send(new CreateOfferCommand(userId,dto));
-            return response.Success? CreatedAtAction(nameof(GetById), new { id = response.Data!.Id }, response)
-                : BadRequest(response);
-        
-        }
-        //public async Task<IActionResult> GetShippingShipmentById(int Id)
-        //{
-        //    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //    var query = new GetShippingShipmentByIdQuery
-        //    {
-        //        UserId = userId,
-        //        ShipmentId = Id,
-        //    };
 
-        //    var result = await _mediator.Send(query);
 
-        //    return result.Success ? Ok(result) : BadRequest(result);
-        //}
-        // PUT: api/offer/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateOfferDto dto)
-        {
-            var response = await _mediator.Send(new UpdateOfferCommand(id, dto));
-            return response.Success ? Ok(response) : NotFound(response);
-        }
 
-        // DELETE: api/offer/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var response = await _mediator.Send(new DeleteOfferCommand(id));
-            return response.Success ? NoContent() : NotFound(response);
-        }
 
         // PUT: api/offer/offer-status/5?isAccepted=true
         [HttpPut("offer-status/{offerId}")]
@@ -95,11 +118,6 @@ namespace ShipConnect.Controllers
         }
 
         // GET: api/offer/total-count
-        [HttpGet("total-count")]
-        public async Task<IActionResult> GetTotalOffersCount()
-        {
-            var response = await _mediator.Send(new GetTotalOffersCountQuery());
-            return response.Success ? Ok(response) : BadRequest(response);
-        }
+
     }
 }

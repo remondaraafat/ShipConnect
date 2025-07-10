@@ -64,6 +64,7 @@
             NewMessage,
             PaymentReceived,
             ShipmentStatusChanged,
+            ShipmentDelivered,
             RatingReceived
         }
     }

@@ -34,7 +34,10 @@ namespace ShipConnect.DTOs.ShipmentDTOs
 
         public string? CompanyName { get; set; }
         public DateTime? ActualDelivery { get; set; }//تاريخ التسليم الفعلي
+        public int offerId { get; set; }
 
+        //rating
+        public int RatingScore { get; set; }
 
     }
 }

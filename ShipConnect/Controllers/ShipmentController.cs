@@ -127,6 +127,16 @@ namespace ShipConnect.Controllers
         }
 
         [Authorize(Roles = "Startup")]
+        [HttpGet("Performance")]
+        public async Task<IActionResult> GetMonthlyDeliveryPerformance()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var result = await _mediator.Send(new GetMonthlyDeliveryPerformanceQuery(userId));
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Startup")]
         [HttpPost("startUp/add")]
         public async Task<IActionResult> Addshipment(AddShipmentDTO shipmentDTO)
         {
@@ -181,35 +191,8 @@ namespace ShipConnect.Controllers
             if (ModelState.IsValid)
             {
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                var command = new EditShipmentCommand
-                {
-                    ShipmentID = id,
-                    //Title = shipmentDTO.Title,
-                    WeightKg = shipmentDTO.WeightKg,
-                    Dimensions = shipmentDTO.Dimensions,
-                    Quantity = shipmentDTO.Quantity,
-                    Price = shipmentDTO.Price,
-                    //DestinationCity = shipmentDTO.DestinationCity,
-                    DestinationAddress = shipmentDTO.DestinationAddress,
-                    TransportType = shipmentDTO.TransportType,
-                    ShipmentType = shipmentDTO.ShipmentType,
-                    ShippingScope = shipmentDTO.ShippingScope,
-                    Description = shipmentDTO.Description,
-                    PackagingOptions = shipmentDTO.PackagingOptions,
-                    Packaging = shipmentDTO.Packaging,
-                    RequestedPickupDate = shipmentDTO.RequestedPickupDate,
-                    SenderPhone = shipmentDTO.SenderPhone,
-                    //SenderCity = shipmentDTO.SenderCity,
-                    SenderAddress = shipmentDTO.SenderAddress,
-                    SentDate = shipmentDTO.SentDate,
-                    RecipientName = shipmentDTO.RecipientName,
-                    RecipientPhone = shipmentDTO.RecipientPhone,
-                    RecipientEmail = shipmentDTO.RecipientEmail,
-                    //ReceiverNotes = shipmentDTO.ReceiverNotes,
-                    UserId = userId
-                };
 
-                var result = await _mediator.Send(command);
+                var result = await _mediator.Send(new EditShipmentCommand(userId,id,shipmentDTO));
 
                 return result.Success ? Ok(result) : BadRequest(result);
 

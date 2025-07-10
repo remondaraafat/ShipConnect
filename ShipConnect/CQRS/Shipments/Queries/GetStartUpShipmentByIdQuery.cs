@@ -28,7 +28,10 @@ namespace ShipConnect.CQRS.Shipments.Queries
             if (shipment == null)
                 return GeneralResponse<GetShipmentByIdDTO>.FailResponse($"Shipment with ID {request.ShipmentId} not found");
 
-            var acceptedOffer = UnitOfWork.OfferRepository.GetWithFilterAsync(o => o.ShipmentId == shipment.Id && o.IsAccepted == true).FirstOrDefault() ;
+            var acceptedOffer = UnitOfWork.OfferRepository
+                .GetWithFilterAsync(o => o.ShipmentId == shipment.Id && o.IsAccepted == true)
+                .Select(s => new { s.Ratings, s.ShippingCompany,s.Id})
+                .FirstOrDefault();
 
             var receiverData = await UnitOfWork.ReceiverRepository.GetFirstOrDefaultAsync(r => r.Id == shipment.ReceiverId);
 
@@ -59,6 +62,8 @@ namespace ShipConnect.CQRS.Shipments.Queries
                 ReceiverPhone = receiverData.Phone,
                 ActualDelivery = shipment?.ActualDelivery,
                 CompanyName= acceptedOffer?.ShippingCompany?.CompanyName??"N/A",
+                offerId = acceptedOffer.Id,
+                RatingScore = acceptedOffer?.Ratings?.Score??0,
             };
 
             return GeneralResponse<GetShipmentByIdDTO>.SuccessResponse($"Shipment with ID {request.ShipmentId} retrieved successfully",data);
