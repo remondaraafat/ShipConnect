@@ -9,13 +9,13 @@ namespace ShipConnect.CQRS.ChatCQRS
     {
         public SendChatMessageRequestDTO DTO { get; set; } 
     }
-    public class SendChatMessageCommandHandler : IRequestHandler<SendChatMessageCommand, SendChatMessageDTO>
-    {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IHubContext<ChatHub> _hubContext;
-        public Task<SendChatMessageDTO> Handle(SendChatMessageCommand request, CancellationToken cancellationToken)
-        {
+    //public class SendChatMessageCommandHandler : IRequestHandler<SendChatMessageCommand, SendChatMessageDTO>
+    //{
+    //    //private readonly IUnitOfWork _unitOfWork;
+    //    //private readonly IHubContext<ChatHub> _hubContext;
+    //    //public Task<SendChatMessageDTO> Handle(SendChatMessageCommand request, CancellationToken cancellationToken)
+    //    //{
             
-        }
-    }
+    //    //}
+    //}
 }
