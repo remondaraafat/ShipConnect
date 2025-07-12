@@ -9,9 +9,6 @@ namespace ShipConnect.Models
     {
         [Required] 
         public string Code { get; set; }
-
-        //[MaxLength(100)]
-        //public string Title { get; set; }
         public double WeightKg { get; set; }  // وزن الشحنة بالكيلو
         public int Quantity { get; set; }
         public decimal Price { get; set; }
@@ -22,8 +19,6 @@ namespace ShipConnect.Models
         [MaxLength(300)]
         public string DestinationAddress { get; set; }
 
-        //[MaxLength(100)]
-        //public string DestinationCity { get; set; }
         public string ShipmentType { get; set; } // نوع الشحنة (مثلاً: أجهزة، أوراق، ...)
         public TransportType TransportType { get; set; }
         public ShippingScope ShippingScope { get; set; }
@@ -34,11 +29,9 @@ namespace ShipConnect.Models
         public string? Description { get; set; }
         //sender data
         public string? SenderPhone { get; set; }
-        //public string? SenderCity { get; set; }
         public string? SenderAddress { get; set; }//عنوان الارسال
         public DateTime SentDate { get; set; }//تاريخ الارسال
-
-        //public string? ReceiverNotes { get; set; }
+        public DateTime? ActualSentDate { get; set; }//تاريخ الارسال الفعلي
         public DateTime? ActualDelivery { get; set; }//تاريخ التسليم الفعلي
         public int StartupId { get; set; }
         public int ReceiverId { get; set; }
@@ -50,7 +43,6 @@ namespace ShipConnect.Models
         [ForeignKey("StartupId")]
         public StartUp? Startup { get; set; }
 
-        //public ICollection<Tracking> Trackings { get; set; }
         public ICollection<Offer> Offers { get; set; }
         public ICollection<ChatMessage> ChatMessages { get; set; }
         public ICollection<Payment> Payments { get; set; }

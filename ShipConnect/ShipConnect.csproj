@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="51Degrees.mobi-core" Version="3.2.21.1" />
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
     <PackageReference Include="MailKit" Version="4.13.0" />
@@ -45,7 +46,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="CQRS\Offers\Queries\" />
     <Folder Include="DTOs\ShippingCompanyDTOs\" />
   </ItemGroup>
 

@@ -8,6 +8,7 @@ using ShipConnect.CQRS.Shipments.Commands;
 using ShipConnect.CQRS.Shipments.Queries;
 using ShipConnect.DTOs.ShipmentDTOs;
 using ShipConnect.Helpers;
+using ShipConnect.Models;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
@@ -24,59 +25,17 @@ namespace ShipConnect.Controllers
             this._mediator = mediator;
         }
 
-        #region ShippingCompany
-
-        [Authorize(Roles = "ShippingCompany")]
-        [HttpGet("ShippingCompany/{Id:int}")]
-        public async Task<IActionResult> GetShippingShipmentById(int Id)
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var query = new GetShippingShipmentByIdQuery
-            {
-                UserId = userId,
-                ShipmentId = Id,
-            };
-
-            var result = await _mediator.Send(query);
-
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
-
-        [Authorize(Roles = "ShippingCompany")]
-        [HttpGet("UpdateStatus/{ShipmentId:int}")]
-        public async Task<IActionResult> UpdateShipmentStatus(int ShipmentId, int Status)
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var query = new UpdateShipmentStatusCommand
-            {
-                UserId = userId,
-                ShipmentId = ShipmentId,
-                ShipmentStatus = Status,
-            };
-
-            var result = await _mediator.Send(query);
-
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
-
-        #endregion
-
-
-        #region StartUp 
+        #region StartUp
 
         [Authorize(Roles = "Startup")]
-        [HttpGet("Count/{Status:int}")]
-        public async Task<IActionResult> ShipmentStatusCountStartUp(int Status = -1)
+        [HttpGet("startUp/Id/{Id:int}")]
+        public async Task<IActionResult> GetStartUpShipmentById(int Id)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized(); 
 
-            var query = new StartUpShipmentStatusCountQuery
-            {
-                UserId = userId,
-                ShipmentStatus = Status
-            };
-
-            var result = await _mediator.Send(query);
+            var result = await _mediator.Send(new GetStartUpShipmentByIdQuery(userId, Id));
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -85,13 +44,10 @@ namespace ShipConnect.Controllers
         public async Task<IActionResult> GetShippingMethodCount()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var query = new GetShippingMethodCountQuery
-            {
-                UserId = userId,
-            };
+            if (userId is null)
+                return Unauthorized();
 
-            var result = await _mediator.Send(query);
-
+            var result = await _mediator.Send(new GetShippingMethodCountQuery(userId));
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -100,29 +56,10 @@ namespace ShipConnect.Controllers
         public async Task<IActionResult> GetShippingScopeCount()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var query = new GetShippingScopeCountQuery
-            {
-                UserId = userId,
-            };
-
-            var result = await _mediator.Send(query);
-
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
-
-        [Authorize(Roles = "Startup")]
-        [HttpGet("startUp/Id/{Id:int}")]
-        public async Task<IActionResult> GetStartUpShipmentById(int Id)
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var query = new GetStartUpShipmentByIdQuery
-            {
-                UserId = userId,
-                ShipmentId = Id,
-            };
-
-            var result = await _mediator.Send(query);
-
+            if (userId is null)
+                return Unauthorized(); 
+           
+            var result = await _mediator.Send(new GetShippingScopeCountQuery(userId));
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -131,6 +68,8 @@ namespace ShipConnect.Controllers
         public async Task<IActionResult> GetMonthlyDeliveryPerformance()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized();
 
             var result = await _mediator.Send(new GetMonthlyDeliveryPerformanceQuery(userId));
             return Ok(result);
@@ -143,35 +82,10 @@ namespace ShipConnect.Controllers
             if (ModelState.IsValid)
             {
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                var command = new AddShipmentCommand
-                {
-                    //Title = shipmentDTO.Title,
-                    WeightKg = shipmentDTO.WeightKg,
-                    Dimensions = shipmentDTO.Dimensions,
-                    Quantity = shipmentDTO.Quantity,
-                    Price = shipmentDTO.Price,
-                    //DestinationCity = shipmentDTO.DestinationCity,
-                    DestinationAddress = shipmentDTO.DestinationAddress,
-                    TransportType = shipmentDTO.TransportType,
-                    ShipmentType = shipmentDTO.ShipmentType,
-                    ShippingScope = shipmentDTO.ShippingScope,
-                    Description = shipmentDTO.Description,
-                    Packaging = shipmentDTO.Packaging,
-                    PackagingOptions = shipmentDTO.PackagingOptions,
-                    RequestedPickupDate = shipmentDTO.RequestedPickupDate,
-                    SenderPhone = shipmentDTO.SenderPhone,
-                    //SenderCity = shipmentDTO.SenderCity,
-                    SenderAddress = shipmentDTO.SenderAddress,
-                    SentDate = shipmentDTO.SentDate,
-                    RecipientName = shipmentDTO.RecipientName,
-                    RecipientPhone = shipmentDTO.RecipientPhone,
-                    RecipientEmail = shipmentDTO.RecipientEmail,
-                    //ReceiverNotes = shipmentDTO.ReceiverNotes,
-                    UserId = userId
-                };
+                if (userId is null)
+                    return Unauthorized();
 
-                var result = await _mediator.Send(command);
-
+                var result = await _mediator.Send(new AddShipmentCommand(userId,shipmentDTO));
                 return result.Success ? Ok(result) : BadRequest(result);
 
             }
@@ -181,21 +95,20 @@ namespace ShipConnect.Controllers
             .ToList();
 
             return BadRequest(GeneralResponse<List<string>>.FailResponse("Validation Failed", errors));
-
         }
 
         [Authorize(Roles = "Startup")]
-        [HttpPost("startUp/edit/{id:int}")]
+        [HttpPut("startUp/edit/{id:int}")]
         public async Task<IActionResult> Editshipment(int id, EditShipmentDTO shipmentDTO)
         {
             if (ModelState.IsValid)
             {
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId is null)
+                    return Unauthorized();
 
-                var result = await _mediator.Send(new EditShipmentCommand(userId,id,shipmentDTO));
-
+                var result = await _mediator.Send(new EditShipmentCommand(userId, id, shipmentDTO));
                 return result.Success ? Ok(result) : BadRequest(result);
-
             }
             var errors = ModelState.Values
             .SelectMany(v => v.Errors)
@@ -203,7 +116,6 @@ namespace ShipConnect.Controllers
             .ToList();
 
             return BadRequest(GeneralResponse<List<string>>.FailResponse("Validation Failed", errors));
-
         }
 
         [Authorize(Roles = "Startup")]
@@ -211,33 +123,78 @@ namespace ShipConnect.Controllers
         public async Task<IActionResult> DeleteShipment(int id)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized();
 
-            var query = new DeleteShipmentCommand
-            {
-                UserID = userId,
-                ShipmentId = id
-            };
-
-            var result = await _mediator.Send(query);
+            var result = await _mediator.Send(new DeleteShipmentCommand(userId, id));
             return result.Success ? Ok(result) : BadRequest(result);
         }
         #endregion
 
+        
+        #region ShippingCompany
 
+        [Authorize(Roles = "ShippingCompany")]
+        [HttpGet("ShippingCompany/{Id:int}")]
+        public async Task<IActionResult> GetShippingShipmentById(int Id)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized();
+
+            var result = await _mediator.Send(new GetShippingShipmentByIdQuery(userId, Id));
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [Authorize(Roles = "ShippingCompany")]
+        [HttpGet("ShipmentRequests")]
+        public async Task<IActionResult> GetShipmentRequests(int pageNumber = 1, int pageSize = 10)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized();
+
+            var result = await _mediator.Send(new GetShipmentRequestsQuery(userId, pageNumber, pageSize));
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [Authorize(Roles = "ShippingCompany")]
+        [HttpGet("ShipmentDetails/{shipmentId:int}")]
+        public async Task<IActionResult> GetShipmentDetails(int shipmentId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized();
+
+            var result = await _mediator.Send(new GetShipmentDetailsQuery(userId, shipmentId));
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [Authorize(Roles = "ShippingCompany")]
+        [HttpGet("UpdateStatus/{ShipmentId:int}")]
+        public async Task<IActionResult> UpdateShipmentStatus(int ShipmentId, int Status)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized();
+
+            var result = await _mediator.Send(new UpdateShipmentStatusCommand(userId, ShipmentId, Status));
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+        
+        #endregion
+        
+        
         #region StartUp & Shipping Company 
+
         [HttpGet("AllShipments")]
         public async Task<IActionResult> GetAllShipments(int pageNumber = 1, int pageSize = 10)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var query = new GetAllShipmentsQuery
-            {
-                UserId = userId,
-                PageNumber = pageNumber,
-                PageSize = pageSize
-            };
+            if (userId is null)
+                return Unauthorized();
 
-            var result = await _mediator.Send(query);
-
+            var result = await _mediator.Send(new GetAllShipmentsQuery(userId, pageNumber, pageSize));
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -245,14 +202,10 @@ namespace ShipConnect.Controllers
         public async Task<IActionResult> GetShipmentWithCode(string code)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var query = new GetShipmentWithCodeQuery
-            {
-                UserId = userId,
-                Code = code,
-            };
+            if (userId is null)
+                return Unauthorized(); 
 
-            var result = await _mediator.Send(query);
-
+            var result = await _mediator.Send(new GetShipmentWithCodeQuery(userId, code));
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -260,16 +213,10 @@ namespace ShipConnect.Controllers
         public async Task<IActionResult> GetShipmentsWithStatus(int status, int pageNumber = 1, int pageSize = 10)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var query = new GetShipmentsWithStatusQuery
-            {
-                UserId = userId,
-                Status = status,
-                PageNumber = pageNumber,
-                PageSize = pageSize
-            };
-
-            var result = await _mediator.Send(query);
-
+            if (userId is null)
+                return Unauthorized(); 
+        
+            var result = await _mediator.Send(new GetShipmentsWithStatusQuery(userId, status,pageNumber,pageNumber));
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -277,17 +224,12 @@ namespace ShipConnect.Controllers
         public async Task<IActionResult> StatusCount()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var query = new GetAllStatusCountQuery
-            {
-                UserId = userId,
-            };
+            if (userId is null)
+                return Unauthorized();
 
-            var result = await _mediator.Send(query);
-
+            var result = await _mediator.Send(new GetAllStatusCountQuery(userId));
             return result.Success ? Ok(result) : BadRequest(result);
         }
-
-       
 
         #endregion
 
@@ -298,12 +240,31 @@ namespace ShipConnect.Controllers
         [HttpGet("Admin/StatusCount")]
         public async Task<IActionResult> AdminStatusCount()
         {
-            var query = new AdminStatusCountQuery();
-
-            var result = await _mediator.Send(query);
-
+            var result = await _mediator.Send(new AdminStatusCountQuery());
             return result.Success ? Ok(result) : BadRequest(result);
         }
+
+
+        #endregion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        #region Admin
+
 
         [Authorize(Roles = "Admin")]
         [HttpGet("Admin/ShippingCount/{shippingCompanyId:int}")]

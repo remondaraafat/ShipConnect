@@ -13,7 +13,7 @@ namespace ShipConnect.CQRS.Offers.Commands
     // command
     public class CreateOfferCommand : IRequest<GeneralResponse<ReadOfferDto>>
     {
-        public string UserId { get; set; }
+        public string UserId { get;}
         public CreateOfferDto Dto { get; }
 
         public CreateOfferCommand(string userId ,CreateOfferDto dto)
@@ -37,13 +37,33 @@ namespace ShipConnect.CQRS.Offers.Commands
 
         public async Task<GeneralResponse<ReadOfferDto>> Handle(CreateOfferCommand request, CancellationToken cancellationToken)
         {
-            try
-            {
-                var company = await _unitOfWork.ShippingCompanyRepository.GetFirstOrDefaultAsync(c => c.UserId == request.UserId);
-                if (company is null)
-                    return GeneralResponse<ReadOfferDto>.FailResponse("Unauthorized user");
 
-                var offer = new Offer
+            var company = await _unitOfWork.ShippingCompanyRepository.GetFirstOrDefaultAsync(c => c.UserId == request.UserId);
+            if (company is null)
+                return GeneralResponse<ReadOfferDto>.FailResponse("User not found");
+
+            var shipment = await _unitOfWork.ShipmentRepository
+                                            .GetWithFilterAsync(s => s.Id == request.Dto.ShipmentId 
+                                            && s.Status==ShipmentStatus.Pending
+                                            && !s.Offers.Any(o=>o.IsAccepted)).Include(s => s.Startup )
+                                            .FirstOrDefaultAsync(cancellationToken);
+
+            if (shipment == null)
+                return GeneralResponse<ReadOfferDto>.FailResponse("Shipment not available");
+
+            var exists = await _unitOfWork.OfferRepository
+                                            .GetFirstOrDefaultAsync(o=>o.ShippingCompanyId ==company.Id
+                                            &&o.ShipmentId==request.Dto.ShipmentId
+                                            &&o.Price==request.Dto.Price
+                                            &&o.EstimatedDeliveryDays==request.Dto.EstimatedDeliveryDays);
+
+            if(exists!=null)
+                return GeneralResponse<ReadOfferDto>.FailResponse("Offer already submitted");
+
+            if (request.Dto.Price <= 0 || request.Dto.EstimatedDeliveryDays <= 0)
+                return GeneralResponse<ReadOfferDto>.FailResponse("Invalid offer values");
+
+            var offer = new Offer
                 {
                     Price = request.Dto.Price,
                     EstimatedDeliveryDays = request.Dto.EstimatedDeliveryDays,
@@ -53,43 +73,38 @@ namespace ShipConnect.CQRS.Offers.Commands
                     IsAccepted = false,
                 };
 
-                await _unitOfWork.OfferRepository.AddAsync(offer);
-                await _unitOfWork.SaveAsync();
+            await _unitOfWork.OfferRepository.AddAsync(offer);
+            await _unitOfWork.SaveAsync();
 
-                //send notification to startup
-                var shipment = _unitOfWork.ShipmentRepository.GetWithFilterAsync(s=>s.Id==request.Dto.ShipmentId).Select(s=>new {s.Code, s.Startup}).FirstOrDefault();
+            //send notification to startup
 
-                if(shipment?.Startup?.UserId != null)
+            if(shipment?.Startup?.UserId != null)
+            {
+                var notificationDto = new CreateNotificationDTO
                 {
-                    var notificationDto = new CreateNotificationDTO
-                    {
-                        Title = "New Offer Received",
-                        Message = $"You have received a new shipping offer for your shipment {shipment.Code}",
-                        RecipientId = shipment.Startup.UserId,
-                        NotificationType = NotificationType.NewOffer,
-                    };
-
-                    await _mediator.Send(new CreateNotificationCommand(notificationDto));
-                }
-
-                var dto = new ReadOfferDto
-                {
-                    Id = offer.Id,
-                    Price = offer.Price,
-                    EstimatedDeliveryDays = offer.EstimatedDeliveryDays,
-                    Notes = offer.Notes,
-                    IsAccepted = offer.IsAccepted,
-                    ShipmentId = offer.ShipmentId,
-                    CreatedAt =offer.CreatedAt,
-                    ShippingCompanyId=company.Id,   
+                    Title = "New Offer Received",
+                    Message = $"You have received a new shipping offer for your shipment {shipment.Code} from {company.CompanyName}",
+                    RecipientId = shipment.Startup.UserId,
+                    NotificationType = NotificationType.NewOffer,
                 };
 
-                return GeneralResponse<ReadOfferDto>.SuccessResponse("Offer created successfully", dto);
+                await _mediator.Send(new CreateNotificationCommand(notificationDto));
             }
-            catch (Exception ex)
+
+            var dto = new ReadOfferDto
             {
-                return GeneralResponse<ReadOfferDto>.FailResponse($"Failed to create offer: {ex.Message}");
-            }
+                Id = offer.Id,
+                Price = offer.Price,
+                EstimatedDeliveryDays = offer.EstimatedDeliveryDays,
+                Notes = offer.Notes,
+                IsAccepted = offer.IsAccepted,
+                ShipmentId = offer.ShipmentId,
+                CreatedAt =offer.CreatedAt,
+                ShippingCompanyId=company.Id,   
+            };
+
+            return GeneralResponse<ReadOfferDto>.SuccessResponse("Offer created successfully", dto);
+
         }
     }
 }

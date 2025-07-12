@@ -6,8 +6,8 @@ namespace ShipConnect.CQRS.Offers.Commands
 {
     public class DeleteOfferCommand : IRequest<GeneralResponse<string>>
     {
-        public string UserId { get; set; }
-        public int OfferId { get; set; }
+        public string UserId { get;}
+        public int OfferId { get;}
 
         public DeleteOfferCommand(string userId, int id)
         {
@@ -31,14 +31,19 @@ namespace ShipConnect.CQRS.Offers.Commands
             if (company == null)
                 return GeneralResponse<string>.FailResponse("Unauthorized user");
 
-            var offer = await _unitOfWork.OfferRepository.GetFirstOrDefaultAsync(o=>o.Id==request.OfferId && o.ShippingCompanyId==company.Id);
+            var offer = await _unitOfWork.OfferRepository
+                                        .GetFirstOrDefaultAsync(o=>o.Id==request.OfferId 
+                                        && o.ShippingCompanyId==company.Id
+                                        && !o.IsAccepted);
+
             if (offer == null)
-                return GeneralResponse<string>.FailResponse("Offer not found or you do not have permission to delete it.");
+                return GeneralResponse<string>.FailResponse("Offer not found or offer already accepted");
 
-            if(offer.IsAccepted)
-                return GeneralResponse<string>.FailResponse("Cannot delete an offer that has already been accepted");
+            await _unitOfWork.OfferRepository
+                            .DeleteAsync(o => o.Id == request.OfferId
+                            && o.ShippingCompanyId == company.Id
+                            && !o.IsAccepted);
 
-            await _unitOfWork.OfferRepository.DeleteAsync(o => o.Id == request.OfferId);
             await _unitOfWork.SaveAsync();
 
             return GeneralResponse<string>.SuccessResponse("Offer deleted successfully");

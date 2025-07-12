@@ -7,10 +7,6 @@ namespace ShipConnect.DTOs.ShipmentDTOs
 {
     public class ShipmentDTO
     {
-        //[Required(ErrorMessage = "*")]
-        //[MaxLength(100)]
-        //public string Title { get; set; }
-
         [Required(ErrorMessage = "*")]
         [Range(0.1, double.MaxValue, ErrorMessage ="Weight must be greater than 0")]
         public double WeightKg { get; set; }  // وزن الشحنة بالكيلو

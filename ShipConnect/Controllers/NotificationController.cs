@@ -20,39 +20,30 @@ namespace ShipConnect.Controllers
             _mediator = mediator;
         }
 
-        /// <summary>
-        /// Send a real-time notification to a specific user.
-        /// </summary>
-        [HttpPost("SendNotification")]
-        public async Task<IActionResult> SendNotification([FromBody] CreateNotificationDTO dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(GeneralResponse<string>.FailResponse("Invalid input"));
-
-            var result = await _mediator.Send(new CreateNotificationCommand(dto));
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
+        #region Notification
 
         [HttpGet("MyNotifications")]
         public async Task<IActionResult> GetUserNotifications()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+
             var result = await _mediator.Send(new GetUserNotificationsQuery(userId));
 
             return result.Success ? Ok(result) : BadRequest(result);
-        }
+        } 
+        #endregion
 
-        [HttpPut("MarkAsRead/{notificationId:int}")]
-        public async Task<IActionResult> MarkAsRead(int notificationId)
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //[HttpPut("MarkAsRead/{notificationId:int}")]
+        //public async Task<IActionResult> MarkAsRead(int notificationId)
+        //{
+        //    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            var command = new MarkNotificationAsReadCommand(userId, notificationId);
-            var result = await _mediator.Send(command);
+        //    var command = new MarkNotificationAsReadCommand(userId, notificationId);
+        //    var result = await _mediator.Send(command);
 
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
+        //    return result.Success ? Ok(result) : BadRequest(result);
+        //}
 
         [HttpPut("GetUnreadNotificationsCount")]
         public async Task<IActionResult> GetUnreadNotificationsCount()

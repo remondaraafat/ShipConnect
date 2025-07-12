@@ -10,9 +10,15 @@ namespace ShipConnect.CQRS.Shipments.Commands
 {
     public class UpdateShipmentStatusCommand : IRequest<GeneralResponse<string>>
     {
-        public string UserId { get; set; }
+        public string UserId { get;}
         public int ShipmentId { get; set; }
         public int ShipmentStatus { get; set; }
+
+        public UpdateShipmentStatusCommand(string userId, int shipmentId,int shipmentStatus) { 
+            UserId = userId;
+            ShipmentId = shipmentId;
+            ShipmentStatus = shipmentStatus;
+        }
     }
 
     public class UpdateShipmentStatusCommandHandler : IRequestHandler<UpdateShipmentStatusCommand, GeneralResponse<string>>
@@ -32,30 +38,33 @@ namespace ShipConnect.CQRS.Shipments.Commands
         {
             var company = await _unitOfWork.ShippingCompanyRepository.GetFirstOrDefaultAsync(s => s.UserId == request.UserId);
             if (company is null)
-                return GeneralResponse<string>.FailResponse("Unauthorized user");
+                return GeneralResponse<string>.FailResponse("User not found");
 
             if (!Enum.IsDefined(typeof(ShipmentStatus), request.ShipmentStatus))
                 return GeneralResponse<string>.FailResponse("Invalid shipment status value");
 
             var newStatus = (ShipmentStatus)request.ShipmentStatus;
 
-            var query = _unitOfWork.OfferRepository
+            var query = await _unitOfWork.OfferRepository
                 .GetWithFilterAsync(o => o.ShippingCompanyId == company.Id
                     && o.ShipmentId == request.ShipmentId
                     && o.IsAccepted)
-                .Select(o => new { o.Shipment, o.Shipment.Startup })
-                .FirstOrDefault();
+                .Include(o => o.Shipment).ThenInclude(o=>o.Startup).ThenInclude(o=>o.User)
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (query is null)
                 return GeneralResponse<string>.FailResponse("Shipment not found");
-
+           
+            if (newStatus == ShipmentStatus.InTransit)
+                query.Shipment.ActualSentDate = DateTime.Now;
+            
             query.Shipment.Status = newStatus;
 
             string formattedStatus = Regex.Replace(newStatus.ToString(), "(\\B[A-Z])", " $1");
 
             var notification = new CreateNotificationDTO
             {
-                RecipientId = query.Startup.UserId,
+                RecipientId = query.Shipment.Startup.UserId,
                 Title = newStatus == ShipmentStatus.Delivered
                     ? "Shipment Delivered"
                     : "Shipment Status Updated",
@@ -71,11 +80,13 @@ namespace ShipConnect.CQRS.Shipments.Commands
 
             if (newStatus == ShipmentStatus.Delivered)
             {
+                query.Shipment.ActualDelivery = DateTime.Now;
+
                 await _emailService.SendEmailAsync(
-                    toEmail: query.Startup.User.Email,
+                    toEmail: query.Shipment.Startup.User.Email,
                     subject: "Shipment Delivered",
                     body: $@"
-                        <h2>Dear {query.Startup.User.Name},</h2>
+                        <h2>Dear {query.Shipment.Startup.User.Name},</h2>
                         <p>We are pleased to inform you that your shipment with code <strong>{query.Shipment.Code}</strong> has been successfully delivered.</p>
                         <p>Thank you for using <strong>ShipConnect</strong>. We hope to serve you again soon.</p>
                         <hr />

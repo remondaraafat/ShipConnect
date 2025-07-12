@@ -4,7 +4,7 @@ namespace ShipConnect.CQRS.Shipments.Queries
 {
     public class GetMonthlyDeliveryPerformanceQuery:IRequest<GeneralResponse<List<MonthlyDeliveryDto>>>
     {
-        public string UserId { get; set; }
+        public string UserId { get; }
 
         public GetMonthlyDeliveryPerformanceQuery(string userId) => UserId = userId;
     }
@@ -24,21 +24,23 @@ namespace ShipConnect.CQRS.Shipments.Queries
                 .GetFirstOrDefaultAsync(s => s.UserId == request.UserId);
 
             if (startUp == null)
-                return GeneralResponse<List<MonthlyDeliveryDto>>.FailResponse("Unauthorized user");
+                return GeneralResponse<List<MonthlyDeliveryDto>>.FailResponse("User not found");
 
-            var shipment = _unitOfWork.OfferRepository
-                                    .GetWithFilterAsync(o => o.IsAccepted &&
-                                    o.Shipment!.StartupId == startUp.Id &&
-                                    o.Shipment.Status == ShipmentStatus.Delivered)
-                                    .Select(s => new
-                                    {
-                                        s.Shipment,
-                                        s.Shipment.ActualDelivery,
-                                        ExpectedDeliveryDate = s.Shipment.RequestedPickupDate.AddDays(s.EstimatedDeliveryDays),
-                                        Month = s.Shipment.ActualDelivery!.Value.Month
-                                    }).ToList();
+            var shipments = await _unitOfWork.OfferRepository
+                .GetWithFilterAsync(o => o.IsAccepted &&
+                    o.Shipment!.StartupId == startUp.Id &&
+                    o.Shipment.Status == ShipmentStatus.Delivered &&
+                    o.Shipment.ActualDelivery != null)
+                .Select(s => new
+                {
+                    s.Shipment,
+                    s.Shipment.ActualDelivery,
+                    ExpectedDeliveryDate = s.Shipment.RequestedPickupDate.AddDays(s.EstimatedDeliveryDays),
+                    Month = s.Shipment.ActualDelivery!.Value.Month
+                })
+                .ToListAsync(cancellationToken);
 
-            var grouped = shipment
+            var grouped = shipments
                 .GroupBy(s => s.Month)
                 .Select(g => new MonthlyDeliveryDto
                 {

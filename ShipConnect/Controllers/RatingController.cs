@@ -6,6 +6,7 @@ using ShipConnect.CQRS.Ratings.Commands;
 using ShipConnect.CQRS.Ratings.Queries;
 using ShipConnect.DTOs.RatingDTOs;
 using ShipConnect.Helpers;
+using ShipConnect.Models;
 
 namespace ShipConnect.Controllers
 {
@@ -20,22 +21,44 @@ namespace ShipConnect.Controllers
             _mediator = mediator;
         }
 
-        [Authorize(Roles ="Startup")]
+        #region startUp
+
+        [Authorize(Roles = "Startup")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateRatingDto dto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized();
 
-            var response = await _mediator.Send(new CreateRatingCommand(userId,dto));
+            var response = await _mediator.Send(new CreateRatingCommand(userId, dto));
             return response.Success ? Ok(response) : BadRequest(response);
         }
 
-        //[HttpGet("company/{companyId}")]
-        //public async Task<IActionResult> GetByCompany(int companyId)
-        //{
-        //    var response = await _mediator.Send(new GetRatingsByCompanyIdQuery(companyId));
-        //    return response.Success ? Ok(response) : NotFound(response);
-        //}
+        [Authorize(Roles = "ShippingCompany")]
+        [HttpGet("LastRate")]
+        public async Task<IActionResult> LastRate()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized();
+
+            var response = await _mediator.Send(new LastRateQuery(userId));
+            return response.Success ? Ok(response) : BadRequest(response);
+        }
+
+        #endregion
+
+        [HttpGet("ShipmentRate/{ShipmentId:int}")]
+        public async Task<IActionResult> GetShipmentRate(int ShipmentId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized();
+
+            var response = await _mediator.Send(new GetShipmentRatingQuery(userId, ShipmentId));
+            return response.Success ? Ok(response) : BadRequest(response);
+        }
 
         [HttpGet("company/{companyId}/average")]
         public async Task<IActionResult> GetAverageScore(int companyId)

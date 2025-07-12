@@ -7,10 +7,12 @@ namespace ShipConnect.CQRS.Offers.Queries
 {
     public class GetOfferByIdQuery : IRequest<GeneralResponse<ReadOfferDto>>
     {
+        public string UserId { get;}
         public int Id { get; }
 
-        public GetOfferByIdQuery(int id)
+        public GetOfferByIdQuery(string userId, int id)
         {
+            UserId = userId;
             Id = id;
         }
     }
@@ -26,8 +28,11 @@ namespace ShipConnect.CQRS.Offers.Queries
 
         public async Task<GeneralResponse<ReadOfferDto>> Handle(GetOfferByIdQuery request, CancellationToken cancellationToken)
         {
-            var offer = await _unitOfWork.OfferRepository.GetByIdAsync(request.Id);
+            var company = await _unitOfWork.ShippingCompanyRepository.GetFirstOrDefaultAsync(c => c.UserId == request.UserId);
+            if (company == null)
+                return GeneralResponse<ReadOfferDto>.FailResponse("User not found");
 
+            var offer = await _unitOfWork.OfferRepository.GetFirstOrDefaultAsync(o=>o.Id==request.Id && o.ShippingCompanyId==company.Id);
             if (offer == null)
                 return GeneralResponse<ReadOfferDto>.FailResponse("Offer not found");
 

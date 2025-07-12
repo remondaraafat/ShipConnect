@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using System.Text.RegularExpressions;
+using MediatR;
 using ShipConnect.DTOs.ShipmentDTOs;
 using ShipConnect.Helpers;
 using ShipConnect.Models;
@@ -8,9 +9,16 @@ namespace ShipConnect.CQRS.Shipments.Queries
 {
     public class GetAllShipmentsQuery : IRequest<GeneralResponse<GetDataResult<List<GetAllShipmentsDTO>>>>
     {
-        public string UserId { get; set; }
+        public string UserId { get;}
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
+
+        public GetAllShipmentsQuery(string userId, int pageNumber, int pageSize)
+        {
+            UserId = userId;
+            PageNumber = pageNumber;
+            PageSize = pageSize;
+        }
     }
     public class GetAllShipmentsQueryHandler : IRequestHandler<GetAllShipmentsQuery, GeneralResponse<GetDataResult<List<GetAllShipmentsDTO>>>>
     {
@@ -36,31 +44,29 @@ namespace ShipConnect.CQRS.Shipments.Queries
                 if (company == null)
                     return GeneralResponse<GetDataResult<List<GetAllShipmentsDTO>>>.FailResponse("Shipping Company not found");
 
-                query = UnitOfWork.OfferRepository.GetWithFilterAsync(o => o.ShippingCompanyId == company.Id && o.IsAccepted == true).Select(s => s.Shipment);
+                query = UnitOfWork.OfferRepository.GetWithFilterAsync(o => o.ShippingCompanyId == company.Id && o.IsAccepted).Select(s => s.Shipment);
 
             }
 
-            int totalCount = query.Count();
+            int totalCount = await query.CountAsync(cancellationToken);
             if (totalCount == 0)
-                return GeneralResponse<GetDataResult<List<GetAllShipmentsDTO>>>.FailResponse("You didn't have any shipment");
+                return GeneralResponse<GetDataResult<List<GetAllShipmentsDTO>>>.FailResponse("You didn't have any shipments");
 
 
-            var shipments = query.OrderByDescending(c => c.SentDate)
-                                                    .Skip((request.PageNumber - 1) * request.PageSize)
-                                                    .Take(request.PageSize)
-                                                    .ToList();
-
-            var result = shipments.Select(q => new GetAllShipmentsDTO
-            {
-                Id = q.Id,
-                Code = q.Code,
-                Status = q.Status.ToString(),
-                RequestedPickupDate = q.RequestedPickupDate,
-            }).ToList();
+            var shipments = await query.OrderByDescending(c => c.SentDate)
+                                        .Skip((request.PageNumber - 1) * request.PageSize)
+                                        .Take(request.PageSize)
+                                        .Select(q => new GetAllShipmentsDTO
+                                        {
+                                            Id = q.Id,
+                                            Code = q.Code,
+                                            Status = Regex.Replace(q.Status.ToString(), "(\\B[A-Z])", " $1"),
+                                            RequestedPickupDate = q.RequestedPickupDate,
+                                        }).ToListAsync(cancellationToken);
 
             var dataResult = new GetDataResult<List<GetAllShipmentsDTO>>
             {
-                Data = result,
+                Data = shipments,
                 TotalCount = totalCount,
                 PageNumber = request.PageNumber,
                 PageSize = request.PageSize

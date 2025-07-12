@@ -1,15 +1,10 @@
-﻿using MediatR;
-using ShipConnect.DTOs.ShipmentDTOs;
-using ShipConnect.Helpers;
-using ShipConnect.Models;
-using ShipConnect.UnitOfWorkContract;
-using static ShipConnect.Enums.Enums;
+﻿using ShipConnect.DTOs.ShipmentDTOs;
 
 namespace ShipConnect.CQRS.Shipments.Commands
 {
     public class EditShipmentCommand:IRequest<GeneralResponse<string>>
     {
-        public string UserId { get; set; }
+        public string UserId { get; }
         public int ShipmentID { get; set; }
 
         public EditShipmentDTO DTO { get; set; }
@@ -37,8 +32,12 @@ namespace ShipConnect.CQRS.Shipments.Commands
             if (startUp == null)
                 return GeneralResponse<string>.FailResponse("Startup not found for current user");
             
-            var shipment = await UnitOfWork.ShipmentRepository.GetByIdAsync(request.ShipmentID);
-            if (shipment == null||shipment.StartupId!=startUp.Id)
+            var shipment = await UnitOfWork.ShipmentRepository
+                                        .GetFirstOrDefaultAsync(s=>s.Id==request.ShipmentID && 
+                                                                s.StartupId==startUp.Id &&
+                                                                s.Status==ShipmentStatus.Pending);
+
+            if (shipment == null)
                 return GeneralResponse<string>.FailResponse("Shipment not found or access denied");
             
             var receiver = await UnitOfWork.ReceiverRepository.GetFirstOrDefaultAsync(r => r.Id == shipment.ReceiverId);
@@ -61,13 +60,14 @@ namespace ShipConnect.CQRS.Shipments.Commands
             shipment.SenderAddress = request.DTO.SenderAddress;
             shipment.SentDate = request.DTO.SentDate;
             receiver.FullName = request.DTO.RecipientName;
-            receiver.Phone =request.DTO.RecipientEmail;
+            receiver.Email =request.DTO.RecipientEmail;
             receiver.Phone=request.DTO.RecipientPhone;            
 
             UnitOfWork.ShipmentRepository.Update(shipment);
-            UnitOfWork.SaveAsync();
+            UnitOfWork.ReceiverRepository.Update(receiver);
+            await UnitOfWork.SaveAsync();
 
-            return GeneralResponse<string>.SuccessResponse("Shipment Edited successfully", shipment.Code);
+            return GeneralResponse<string>.SuccessResponse("Shipment edited successfully", shipment.Code);
         }
     }
 

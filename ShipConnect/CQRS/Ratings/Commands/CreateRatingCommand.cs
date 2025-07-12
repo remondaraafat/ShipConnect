@@ -11,7 +11,7 @@ namespace ShipConnect.CQRS.Ratings.Commands
 {
     public class CreateRatingCommand : IRequest<GeneralResponse<string>>
     {
-        public string UserId { get; set; }
+        public string UserId { get; }
         public CreateRatingDto Dto { get; set; }
 
         public CreateRatingCommand(string userId,CreateRatingDto dto)
@@ -39,12 +39,12 @@ namespace ShipConnect.CQRS.Ratings.Commands
             if (startUp == null)
                 return GeneralResponse<string>.FailResponse("Unauthorized user");
 
-            var offer = _unitOfWork.OfferRepository
+            var offer = await _unitOfWork.OfferRepository
                             .GetWithFilterAsync(o => o.Id == request.Dto.OfferId &&
                             o.IsAccepted &&
                             o.Shipment.Status == ShipmentStatus.Delivered &&
                             o.Shipment.StartupId == startUp.Id)
-                            .Include(s => s.Ratings).FirstOrDefault();
+                            .Include(s => s.Ratings).FirstOrDefaultAsync(cancellationToken);
 
             if (offer== null)
                 return GeneralResponse<string>.FailResponse("Offer not found or shipment not delivered");
