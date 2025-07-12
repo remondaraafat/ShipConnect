@@ -59,10 +59,12 @@
         public enum NotificationType
         {
             General,
+            NewOffer,
             OfferAccepted,
             NewMessage,
             PaymentReceived,
             ShipmentStatusChanged,
+            ShipmentDelivered,
             RatingReceived
         }
     }

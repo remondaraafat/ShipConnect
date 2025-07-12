@@ -6,8 +6,14 @@ namespace ShipConnect.CQRS.Offers.Commands
 {
     public class DeleteOfferCommand : IRequest<GeneralResponse<string>>
     {
-        public int Id { get; set; }
-        public DeleteOfferCommand(int id) => Id = id;
+        public string UserId { get;}
+        public int OfferId { get;}
+
+        public DeleteOfferCommand(string userId, int id)
+        {
+            UserId = userId;
+            OfferId = id;
+        }
     }
 
     public class DeleteOfferHandler : IRequestHandler<DeleteOfferCommand, GeneralResponse<string>>
@@ -21,13 +27,23 @@ namespace ShipConnect.CQRS.Offers.Commands
 
         public async Task<GeneralResponse<string>> Handle(DeleteOfferCommand request, CancellationToken cancellationToken)
         {
-            var offer = await _unitOfWork.OfferRepository.GetByIdAsync(request.Id);
-            if (offer == null)
-            {
-                return GeneralResponse<string>.FailResponse("Offer not found");
-            }
+            var company = await _unitOfWork.ShippingCompanyRepository.GetFirstOrDefaultAsync(c => c.UserId == request.UserId);
+            if (company == null)
+                return GeneralResponse<string>.FailResponse("Unauthorized user");
 
-            await _unitOfWork.OfferRepository.DeleteAsync(o => o.Id == request.Id);
+            var offer = await _unitOfWork.OfferRepository
+                                        .GetFirstOrDefaultAsync(o=>o.Id==request.OfferId 
+                                        && o.ShippingCompanyId==company.Id
+                                        && !o.IsAccepted);
+
+            if (offer == null)
+                return GeneralResponse<string>.FailResponse("Offer not found or offer already accepted");
+
+            await _unitOfWork.OfferRepository
+                            .DeleteAsync(o => o.Id == request.OfferId
+                            && o.ShippingCompanyId == company.Id
+                            && !o.IsAccepted);
+
             await _unitOfWork.SaveAsync();
 
             return GeneralResponse<string>.SuccessResponse("Offer deleted successfully");

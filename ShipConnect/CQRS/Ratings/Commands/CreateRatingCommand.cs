@@ -1,57 +1,81 @@
 ﻿using MediatR;
+using ShipConnect.CQRS.Notification.Commands;
+using ShipConnect.DTOs.NotificationDTO;
 using ShipConnect.DTOs.RatingDTOs;
 using ShipConnect.Helpers;
+using ShipConnect.Migrations;
 using ShipConnect.Models;
 using ShipConnect.UnitOfWorkContract;
 
 namespace ShipConnect.CQRS.Ratings.Commands
 {
-    public class CreateRatingCommand : IRequest<GeneralResponse<ReadRatingDto>>
+    public class CreateRatingCommand : IRequest<GeneralResponse<string>>
     {
-        public CreateRatingDto Dto { get; }
+        public string UserId { get; }
+        public CreateRatingDto Dto { get; set; }
 
-        public CreateRatingCommand(CreateRatingDto dto)
+        public CreateRatingCommand(string userId,CreateRatingDto dto)
         {
+            UserId = userId;
             Dto = dto;
         }
     }
 
 
-    public class CreateRatingHandler : IRequestHandler<CreateRatingCommand, GeneralResponse<ReadRatingDto>>
+    public class CreateRatingHandler : IRequestHandler<CreateRatingCommand, GeneralResponse<string>>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMediator _mediator;
 
-        public CreateRatingHandler(IUnitOfWork unitOfWork)
+        public CreateRatingHandler(IUnitOfWork unitOfWork, IMediator mediator)
         {
             _unitOfWork = unitOfWork;
+            _mediator = mediator;
         }
 
-        public async Task<GeneralResponse<ReadRatingDto>> Handle(CreateRatingCommand request, CancellationToken cancellationToken)
+        public async Task<GeneralResponse<string>> Handle(CreateRatingCommand request, CancellationToken cancellationToken)
         {
-            var entity = new Rating
+            var startUp = await _unitOfWork.StartUpRepository.GetFirstOrDefaultAsync(s => s.UserId == request.UserId);
+            if (startUp == null)
+                return GeneralResponse<string>.FailResponse("Unauthorized user");
+
+            var offer = await _unitOfWork.OfferRepository
+                            .GetWithFilterAsync(o => o.Id == request.Dto.OfferId &&
+                            o.IsAccepted &&
+                            o.Shipment.Status == ShipmentStatus.Delivered &&
+                            o.Shipment.StartupId == startUp.Id)
+                            .Include(s => s.Ratings).FirstOrDefaultAsync(cancellationToken);
+
+            if (offer== null)
+                return GeneralResponse<string>.FailResponse("Offer not found or shipment not delivered");
+
+            if(offer.Ratings != null)
+                return GeneralResponse<string>.FailResponse("You have already rated this shipment");
+
+            var rate = new Rating
             {
-                StartUpId = request.Dto.StartUpId,
-                CompanyId = request.Dto.CompanyId,
-                OfferId = request.Dto.OfferId,
+                StartUpId = startUp.Id,
                 Score = request.Dto.Score,
                 Comment = request.Dto.Comment,
-                CreatedAt = DateTime.UtcNow
+                OfferId = request.Dto.OfferId,
+                CompanyId = offer.ShippingCompanyId,
             };
 
-            await _unitOfWork.RatingRepository.AddAsync(entity);
+            var compny = await _unitOfWork.ShippingCompanyRepository.GetFirstOrDefaultAsync(s => s.Id == offer.ShippingCompanyId);
+            var notificationDto = new CreateNotificationDTO
+            {
+                Title = "You received a new rating",
+                Message = $"Your shipment has been rated by {startUp.CompanyName}",
+                RecipientId = compny.UserId,
+                NotificationType = NotificationType.RatingReceived,
+            };
+
+            await _mediator.Send(new CreateNotificationCommand(notificationDto));
+
+            await _unitOfWork.RatingRepository.AddAsync(rate);
             await _unitOfWork.SaveAsync();
 
-            var dto = new ReadRatingDto
-            {
-                Id = entity.Id,
-                StartUpId = entity.StartUpId,
-                CompanyId = entity.CompanyId,
-                OfferId = entity.OfferId,
-                Score = entity.Score,
-                Comment = entity.Comment
-            };
-
-            return GeneralResponse<ReadRatingDto>.SuccessResponse("Rating created successfully", dto);
+            return GeneralResponse<string>.SuccessResponse("Rating added successfully");
         }
     }
 

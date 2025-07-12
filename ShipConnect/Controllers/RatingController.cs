@@ -1,9 +1,12 @@
-﻿using MediatR;
+﻿using System.Security.Claims;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ShipConnect.CQRS.Ratings.Commands;
 using ShipConnect.CQRS.Ratings.Queries;
 using ShipConnect.DTOs.RatingDTOs;
 using ShipConnect.Helpers;
+using ShipConnect.Models;
 
 namespace ShipConnect.Controllers
 {
@@ -18,18 +21,43 @@ namespace ShipConnect.Controllers
             _mediator = mediator;
         }
 
+        #region startUp
+
+        [Authorize(Roles = "Startup")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateRatingDto dto)
         {
-            var response = await _mediator.Send(new CreateRatingCommand(dto));
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized();
+
+            var response = await _mediator.Send(new CreateRatingCommand(userId, dto));
             return response.Success ? Ok(response) : BadRequest(response);
         }
 
-        [HttpGet("company/{companyId}")]
-        public async Task<IActionResult> GetByCompany(int companyId)
+        [Authorize(Roles = "ShippingCompany")]
+        [HttpGet("LastRate")]
+        public async Task<IActionResult> LastRate()
         {
-            var response = await _mediator.Send(new GetRatingsByCompanyIdQuery(companyId));
-            return response.Success ? Ok(response) : NotFound(response);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized();
+
+            var response = await _mediator.Send(new LastRateQuery(userId));
+            return response.Success ? Ok(response) : BadRequest(response);
+        }
+
+        #endregion
+
+        [HttpGet("ShipmentRate/{ShipmentId:int}")]
+        public async Task<IActionResult> GetShipmentRate(int ShipmentId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId is null)
+                return Unauthorized();
+
+            var response = await _mediator.Send(new GetShipmentRatingQuery(userId, ShipmentId));
+            return response.Success ? Ok(response) : BadRequest(response);
         }
 
         [HttpGet("company/{companyId}/average")]
@@ -39,18 +67,11 @@ namespace ShipConnect.Controllers
             return response.Success ? Ok(response) : NotFound(response);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateRatingDto dto)
-        {
-            var response = await _mediator.Send(new UpdateRatingCommand(id, dto));
-            return response.Success ? Ok(response) : NotFound(response);
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var response = await _mediator.Send(new DeleteRatingCommand(id));
-            return response.Success ? NoContent() : NotFound(response);
-        }
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> Delete(int id)
+        //{
+        //    var response = await _mediator.Send(new DeleteRatingCommand(id));
+        //    return response.Success ? NoContent() : NotFound(response);
+        //}
     }
 }

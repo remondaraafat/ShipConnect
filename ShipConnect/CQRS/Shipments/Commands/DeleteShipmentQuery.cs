@@ -8,6 +8,12 @@ namespace ShipConnect.CQRS.Shipments.Commands
     {
         public string UserID { get; set; }
         public int ShipmentId { get; set; }
+
+        public DeleteShipmentCommand(string UserID, int ShipmentId)
+        {
+            this.UserID = UserID;
+            this.ShipmentId = ShipmentId;
+        }
     }
     public class DeleteShipmentCommandHandler : IRequestHandler<DeleteShipmentCommand, GeneralResponse<string>>
     {
@@ -24,9 +30,14 @@ namespace ShipConnect.CQRS.Shipments.Commands
             if (startUp == null)
                 return GeneralResponse<string>.FailResponse("StartUp not found");
 
-            var shipment = await UnitOfWork.ShipmentRepository.GetFirstOrDefaultAsync(sh => sh.Id == request.ShipmentId && sh.StartupId== startUp.Id);
+            var shipment = await UnitOfWork.ShipmentRepository
+                                        .GetFirstOrDefaultAsync(s =>
+                                            s.Id == request.ShipmentId &&
+                                            s.StartupId == startUp.Id &&
+                                            s.Status == ShipmentStatus.Pending);
+
             if (shipment == null)
-                return GeneralResponse<string>.FailResponse($"Shipment with Id {request.ShipmentId} not found");
+                return GeneralResponse<string>.FailResponse($"Shipment with Id {request.ShipmentId} not found or cannot be deleted");
 
             await UnitOfWork.ShipmentRepository.DeleteAsync(s => s.Id == request.ShipmentId && s.StartupId==startUp.Id);
             await UnitOfWork.SaveAsync();

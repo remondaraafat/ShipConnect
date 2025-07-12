@@ -2,8 +2,7 @@
 
 namespace ShipConnect.RepositoryContract
 {
-    public interface IOfferRepository:IGenericRepository<Offer>
+    public interface IOfferRepository : IGenericRepository<Offer>
     {
-        
     }
 }

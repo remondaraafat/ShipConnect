@@ -8,12 +8,25 @@
 
   <ItemGroup>
     <Compile Remove="CQRS\Register\Queries\**" />
+    <Compile Remove="CQRS\Tracking\**" />
+    <Compile Remove="DTOs\ReceivderDTOs\**" />
+    <Compile Remove="DTOs\TrackingDTOs\**" />
     <Content Remove="CQRS\Register\Queries\**" />
+    <Content Remove="CQRS\Tracking\**" />
+    <Content Remove="DTOs\ReceivderDTOs\**" />
+    <Content Remove="DTOs\TrackingDTOs\**" />
     <EmbeddedResource Remove="CQRS\Register\Queries\**" />
+    <EmbeddedResource Remove="CQRS\Tracking\**" />
+    <EmbeddedResource Remove="DTOs\ReceivderDTOs\**" />
+    <EmbeddedResource Remove="DTOs\TrackingDTOs\**" />
     <None Remove="CQRS\Register\Queries\**" />
+    <None Remove="CQRS\Tracking\**" />
+    <None Remove="DTOs\ReceivderDTOs\**" />
+    <None Remove="DTOs\TrackingDTOs\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="51Degrees.mobi-core" Version="3.2.21.1" />
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
     <PackageReference Include="MailKit" Version="4.13.0" />
@@ -33,15 +46,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="CQRS\Offers\Commands\" />
-    <Folder Include="CQRS\Offers\Queries\" />
-    <Folder Include="CQRS\Shipments\Commands\" />
-    <Folder Include="CQRS\Tracking\Commands\" />
-    <Folder Include="CQRS\Tracking\Queries\" />
-    <Folder Include="DTOs\TrackingDTOs\" />
     <Folder Include="DTOs\ShippingCompanyDTOs\" />
-    <Folder Include="DTOs\ReceivderDTOs\" />
-    <Folder Include="DTOs\OfferDTOs\" />
   </ItemGroup>
 
 </Project>

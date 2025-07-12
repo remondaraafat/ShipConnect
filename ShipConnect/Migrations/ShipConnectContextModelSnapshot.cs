@@ -177,7 +177,7 @@ namespace ShipConnect.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsActive")
+                    b.Property<bool>("IsApproved")
                         .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
@@ -574,8 +574,8 @@ namespace ShipConnect.Migrations
                     b.Property<int>("OfferId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
+                    b.Property<double>("Score")
+                        .HasColumnType("float");
 
                     b.Property<int>("StartUpId")
                         .HasColumnType("int");
@@ -641,6 +641,9 @@ namespace ShipConnect.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime?>("ActualDelivery")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ActualSentDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Code")

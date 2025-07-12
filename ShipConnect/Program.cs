@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -8,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ShipConnect.Data;
 using ShipConnect.Helpers;
+using ShipConnect.Hubs;
 using ShipConnect.Models;
 using ShipConnect.Repository;
 using ShipConnect.RepositoryContract;
@@ -25,6 +27,7 @@ namespace ShipConnect
 
             builder.Services.AddControllers();
 
+            builder.Services.AddSignalR();
 
             #region DbContext
 
@@ -58,7 +61,26 @@ namespace ShipConnect
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = builder.Configuration["JWT:IssuerIP"],
                     ValidAudience = builder.Configuration["JWT:AudienceIP"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecritKey"]))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecritKey"])),
+
+                    //notification
+                    NameClaimType = ClaimTypes.NameIdentifier
+                };
+                options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        // السماح باستخدام التوكن في WebSocket (SignalR)
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
             #endregion
@@ -120,6 +142,7 @@ namespace ShipConnect
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<INotificationRepository,NotificationRepository>();
 
             builder.Services.AddMediatR(options =>
             options.RegisterServicesFromAssembly(typeof(Program).Assembly));
@@ -142,7 +165,7 @@ namespace ShipConnect
 
 
             app.MapControllers();
-
+            app.MapHub<NotificationHub>("/notificationHub");
             app.Run();
         }
     }

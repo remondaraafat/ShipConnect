@@ -1,17 +1,21 @@
-﻿using MediatR;
+﻿using ShipConnect.CQRS.Notification.Commands;
+using ShipConnect.DTOs.NotificationDTO;
 using ShipConnect.DTOs.OfferDTOs;
-using ShipConnect.Helpers;
-using ShipConnect.UnitOfWorkContract;
+
 
 namespace ShipConnect.CQRS.Offers.Commands
 {
     public class UpdateOfferCommand : IRequest<GeneralResponse<ReadOfferDto>>
     {
-        public int Id { get; set; }
-        public UpdateOfferDto Dto { get; set; }
-        public UpdateOfferCommand(int id, UpdateOfferDto dto)
+        public string UserId { get;}
+
+        public int OfferId { get;}
+        public UpdateOfferDto Dto { get;}
+
+        public UpdateOfferCommand(string userId ,int id, UpdateOfferDto dto)
         {
-            Id = id;
+            UserId = userId;
+            OfferId = id;
             Dto = dto;
         }
     }
@@ -19,27 +23,50 @@ namespace ShipConnect.CQRS.Offers.Commands
     public class UpdateOfferHandler : IRequestHandler<UpdateOfferCommand, GeneralResponse<ReadOfferDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMediator _mediator;
 
-        public UpdateOfferHandler(IUnitOfWork unitOfWork)
+        public UpdateOfferHandler(IUnitOfWork unitOfWork, IMediator mediator)
         {
             _unitOfWork = unitOfWork;
+            _mediator = mediator;
         }
 
         public async Task<GeneralResponse<ReadOfferDto>> Handle(UpdateOfferCommand request, CancellationToken cancellationToken)
         {
-            var offer = await _unitOfWork.OfferRepository.GetByIdAsync(request.Id);
+            var company = await _unitOfWork.ShippingCompanyRepository.GetFirstOrDefaultAsync(c => c.UserId == request.UserId);
+            if (company is null)
+                return GeneralResponse<ReadOfferDto>.FailResponse("Unauthorized user");
+
+            var offer = await _unitOfWork.OfferRepository
+                                        .GetWithFilterAsync(o=>o.Id==request.OfferId
+                                        &&o.ShippingCompanyId==company.Id
+                                        &&!o.IsAccepted)
+                                        .Include(o=>o.Shipment).ThenInclude(o=>o.Startup).FirstOrDefaultAsync(cancellationToken);
+
             if (offer == null)
-            {
-                return GeneralResponse<ReadOfferDto>.FailResponse("Offer not found");
-            }
+                return GeneralResponse<ReadOfferDto>.FailResponse("Offer not found or already accepted");
+
+            if (request.Dto.Price <= 0 || request.Dto.EstimatedDeliveryDays <= 0)
+                return GeneralResponse<ReadOfferDto>.FailResponse("Invalid offer values");
 
             offer.Price = request.Dto.Price;
             offer.EstimatedDeliveryDays = request.Dto.EstimatedDeliveryDays;
             offer.Notes = request.Dto.Notes;
-            offer.IsAccepted = request.Dto.IsAccepted;
 
             _unitOfWork.OfferRepository.Update(offer);
             await _unitOfWork.SaveAsync();
+
+
+            var notificationDto = new CreateNotificationDTO
+            {
+                Title = "Shipping Offer Updated",
+                Message = $"A shipping company has updated their offer for your shipment #{offer.Shipment.Code}.",
+                RecipientId = offer.Shipment.Startup.UserId,
+                NotificationType = NotificationType.NewOffer,
+            };
+
+            await _mediator.Send(new CreateNotificationCommand(notificationDto));
+            
 
             var dto = new ReadOfferDto
             {
@@ -49,7 +76,8 @@ namespace ShipConnect.CQRS.Offers.Commands
                 Notes = offer.Notes,
                 IsAccepted = offer.IsAccepted,
                 ShipmentId = offer.ShipmentId,
-                ShippingCompanyId = offer.ShippingCompanyId
+                ShippingCompanyId = offer.ShippingCompanyId,
+                CreatedAt= offer.UpdatedAt,
             };
 
             return GeneralResponse<ReadOfferDto>.SuccessResponse("Offer updated successfully", dto);

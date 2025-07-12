@@ -53,3 +53,4 @@ namespace ShipConnect.CQRS.Ratings.Commands
     }
 
 }
+

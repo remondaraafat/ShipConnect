@@ -2,8 +2,10 @@
 {
     public class OfferStatsDto
     {
-        public int AcceptedOffersCount { get; set; }
-        public int RejectedOffersCount { get; set; }
+        public int Accepted { get; set; }
+        public int Rejected { get; set; }
+
+        public int TotalCount { get; set; }
     }
 
 }

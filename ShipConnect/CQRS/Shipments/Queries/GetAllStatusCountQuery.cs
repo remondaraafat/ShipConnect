@@ -5,7 +5,9 @@ namespace ShipConnect.CQRS.Shipments.Queries
 {
     public class GetAllStatusCountQuery : IRequest<GeneralResponse<GetAllStatusCountDTO>>
     {
-        public string UserId { get; set; }
+        public string UserId { get; }
+
+        public GetAllStatusCountQuery(string userId)=>UserId = userId;
     }
 
     public class GetAllStatusCountQueryHandler : IRequestHandler<GetAllStatusCountQuery, GeneralResponse<GetAllStatusCountDTO>>
@@ -33,23 +35,35 @@ namespace ShipConnect.CQRS.Shipments.Queries
                     return GeneralResponse<GetAllStatusCountDTO>.FailResponse("User not found");
 
                 query = UnitOfWork.OfferRepository.GetWithFilterAsync(o => o.ShippingCompanyId == company.Id && o.IsAccepted == true).Select(s => s.Shipment!);
-
             }
 
-            int totalCount = query.Count();
-            if (totalCount == 0)
+            //بعمل كدة عشان الاستعلام يتنفذ مرة واحدة بس ف الداتا بيز
+            var grouped = await query.GroupBy(s => 1) // يتأكد أننا نرجع صفًّا واحدًا
+                                        .Select(g => new
+                                        {
+                                            Total = g.Count(),
+                                            Pending = g.Count(s => s.Status == ShipmentStatus.Pending),
+                                            Preparing = g.Count(s => s.Status == ShipmentStatus.Preparing),
+                                            InTransit = g.Count(s => s.Status == ShipmentStatus.InTransit),
+                                            AtWarehouse = g.Count(s => s.Status == ShipmentStatus.AtWarehouse),
+                                            OutForDelivery = g.Count(s => s.Status == ShipmentStatus.OutForDelivery),
+                                            Delivered = g.Count(s => s.Status == ShipmentStatus.Delivered),
+                                            Failed = g.Count(s => s.Status == ShipmentStatus.Failed)
+                                        }).FirstOrDefaultAsync(cancellationToken);
+
+            if (grouped==null||grouped.Total == 0)
                 return GeneralResponse<GetAllStatusCountDTO>.FailResponse("You don't have any shipments");
 
             var data = new GetAllStatusCountDTO
             {
-                Pending = query.Count(c => c.Status == ShipmentStatus.Pending),
-                Preparing = query.Count(c => c.Status == ShipmentStatus.Preparing),
-                InTransit = query.Count(c => c.Status == ShipmentStatus.InTransit),
-                AtWarehouse = query.Count(c => c.Status == ShipmentStatus.AtWarehouse),
-                OutForDelivery = query.Count(c => c.Status == ShipmentStatus.OutForDelivery),
-                Delivered = query.Count(c => c.Status == ShipmentStatus.Delivered),
-                Failed = query.Count(c => c.Status == ShipmentStatus.Failed),
-                TotalCount = totalCount
+                TotalCount = grouped.Total,
+                Pending = grouped.Pending,
+                Preparing = grouped.Preparing,
+                InTransit = grouped.InTransit,
+                AtWarehouse = grouped.AtWarehouse,
+                OutForDelivery = grouped.OutForDelivery,
+                Delivered = grouped.Delivered,
+                Failed = grouped.Failed
             };
 
             return GeneralResponse<GetAllStatusCountDTO>.SuccessResponse("All Shipments status count retrieved successfully",data);
