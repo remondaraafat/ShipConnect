@@ -23,12 +23,12 @@ namespace ShipConnect.Controllers
         #region Notification
 
         [HttpGet("MyNotifications")]
-        public async Task<IActionResult> GetUserNotifications()
+        public async Task<IActionResult> GetUserNotifications(int pageNumber = 1, int pageSize = 10)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
 
-            var result = await _mediator.Send(new GetUserNotificationsQuery(userId));
+            var result = await _mediator.Send(new GetUserNotificationsQuery(userId, pageNumber, pageSize));
 
             return result.Success ? Ok(result) : BadRequest(result);
         } 
