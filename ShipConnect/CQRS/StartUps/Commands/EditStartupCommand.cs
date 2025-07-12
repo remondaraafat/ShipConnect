@@ -9,7 +9,7 @@ namespace ShipConnect.CQRS.StartUps.Commands
     public class EditStartupCommand:IRequest<bool>
     {
         
-        public string Email { get; set; }
+        public string Id { get; set; }
         public EditStartupDTO Data { get; set; }
     }
     public class EditStartupCommandHandler : IRequestHandler<EditStartupCommand, bool>
@@ -20,7 +20,7 @@ namespace ShipConnect.CQRS.StartUps.Commands
         public async Task<bool> Handle(EditStartupCommand request, CancellationToken cancellationToken)
         {
             StartUp entity = await _unitOfWork.StartUpRepository
-            .GetWithFilterAsync(s => s.User.Email == request.Email).FirstOrDefaultAsync();
+            .GetWithFilterAsync(s => s.User.Id == request.Id).FirstOrDefaultAsync();
             
             if (entity == null)
             {

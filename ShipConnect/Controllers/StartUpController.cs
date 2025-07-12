@@ -61,20 +61,20 @@ namespace ShipConnect.Controllers
             [FromBody] UpdateFullProfileDTO requestDto,
             CancellationToken cancellationToken)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email)
-                        ?? User.FindFirst("email")?.Value;
+            string Id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                        
 
-            if (string.IsNullOrEmpty(email))
+            if (string.IsNullOrEmpty(Id))
             {
                 return GeneralResponse<object>.FailResponse(
-                    "Email claim is missing in token."
+                    "Id claim is missing in token."
                 );
             }
 
             var success = await _mediator.Send(
                 new UpdateFullProfileOrchestrator
                 {
-                    Email = email,
+                    Id = Id,
                     DTO = requestDto
                 },
                 cancellationToken
@@ -90,6 +90,27 @@ namespace ShipConnect.Controllers
             return GeneralResponse<object>.SuccessResponse(
                 "Profile updated successfully."
             );
+        }
+        //get all startups
+        //[Authorize]
+        [HttpGet("All")]
+        public async Task<GeneralResponse<object>> GetAllStartups([FromQuery] int pageIndex = 1,
+    [FromQuery] int pageSize = 10)
+        {
+            return GeneralResponse<object>.SuccessResponse(
+                "Success",
+                await _mediator.Send(new GetAllStartupsQuery {
+                    PageIndex = pageIndex,
+                    PageSize = pageSize
+                })
+            );
+        }
+        //get count of startups
+        [Authorize]
+        [HttpGet("Count")]
+        public async Task<GeneralResponse<int>> GetCountOfStartups()
+        {
+            return GeneralResponse<int>.SuccessResponse("Success", await _mediator.Send(new GetCountOfStartupsQuery())) ;
         }
 
     }

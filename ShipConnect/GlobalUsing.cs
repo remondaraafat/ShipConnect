@@ -5,3 +5,4 @@ global using ShipConnect.DTOs.RoleDTOs;
 global using ShipConnect.DTOs.StartUpDTOs;
 global using ShipConnect.UnitOfWorkContract;
 global using Microsoft.EntityFrameworkCore; 
+global using ShipConnect.DTOs;

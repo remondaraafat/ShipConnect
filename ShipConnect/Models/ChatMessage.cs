@@ -8,7 +8,7 @@ namespace ShipConnect.Models
     {
         [MaxLength(2000)]
         public string Content { get; set; } = string.Empty;
-        public DateTime SentAt { get; set; }
+        public DateTime SentAt { get; set; } = DateTime.UtcNow;
         public bool IsRead { get; set; } = false;
         public string SenderId { get; set; }
         public string ReceiverId { get; set; }

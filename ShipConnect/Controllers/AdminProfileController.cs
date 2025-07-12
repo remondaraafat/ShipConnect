@@ -43,16 +43,16 @@ namespace ShipConnect.Controllers
         CancellationToken cancellationToken)
         {
             // جلب البريد من التوكن
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            if (string.IsNullOrEmpty(email))
+            string Id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(Id))
             {
-                return GeneralResponse<object>.FailResponse("Email not found in token.");
+                return GeneralResponse<object>.FailResponse("Id not found in token.");
             }
 
             // استدعاء الأمر
             var result = await _mediator.Send(new EditUserCommand
             {
-                Email = email,
+                Id = Id,
                 DTO = dto
             }, cancellationToken);
 

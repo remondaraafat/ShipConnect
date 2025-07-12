@@ -6,7 +6,7 @@ namespace ShipConnect.CQRS.StartUps.Orchestrator
 {
     public class UpdateFullProfileOrchestrator : IRequest< bool>
     {
-        public string Email { get; set; }
+        public string Id { get; set; }
         public UpdateFullProfileDTO DTO { get; set; }
         
     }
@@ -21,7 +21,7 @@ namespace ShipConnect.CQRS.StartUps.Orchestrator
         {
             var userResult = await _mediator.Send(new EditUserCommand
             {
-                Email = request.Email,
+                Id = request.Id,
                 DTO = request.DTO.UserDTO
             });
 
@@ -30,7 +30,7 @@ namespace ShipConnect.CQRS.StartUps.Orchestrator
             {
                 startupOk = await _mediator.Send(new EditStartupCommand
                 {
-                    Email = request.Email,
+                    Id = request.Id,
                     Data = request.DTO.StartupDTO
                 });
             }
