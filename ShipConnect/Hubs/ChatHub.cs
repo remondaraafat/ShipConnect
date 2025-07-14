@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using ShipConnect.CQRS.ChatCQRS;
+using ShipConnect.CQRS.ChatCQRS.Commands;
 using ShipConnect.DTOs.ChatDTOs;
 
 namespace ShipConnect.Hubs
