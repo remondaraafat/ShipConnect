@@ -2,47 +2,53 @@
 
 namespace ShipConnect.CQRS.StartUps.Queries
 {
-    public class GetAllStartupsQuery:IRequest<PagedResult<GetAllStartupsDTO>>
+    public class GetAllStartupsQuery:IRequest<GeneralResponse<GetDataResult<List<GetAllUsersDTO>>>>
     {
         public int PageIndex { get; set; } = 1;
         public int PageSize { get; set; } = 10;
+
+        public GetAllStartupsQuery(int pageIndex, int pageSize)
+        {
+            PageIndex = pageIndex;
+            PageSize = pageSize;            
+        }
     }
-    public class GetAllStartupsQueryHandler : IRequestHandler<GetAllStartupsQuery,PagedResult<GetAllStartupsDTO>>
+    public class GetAllStartupsQueryHandler : IRequestHandler<GetAllStartupsQuery,GeneralResponse<GetDataResult<List<GetAllUsersDTO>>>>
     {
         private readonly IUnitOfWork _unitOfWork;
         public GetAllStartupsQueryHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
-        public async Task<PagedResult<GetAllStartupsDTO>> Handle(GetAllStartupsQuery request, CancellationToken cancellationToken)
+
+        public async Task<GeneralResponse<GetDataResult<List<GetAllUsersDTO>>>> Handle(GetAllStartupsQuery request, CancellationToken cancellationToken)
         {
-            int total =await _unitOfWork.StartUpRepository.GetAllAsync().AsNoTracking().CountAsync();
+            int total =await _unitOfWork.StartUpRepository.CountAsync(s=>s.User.IsApproved && s.User.Name != "Admin");
+            if(total==0)
+                return GeneralResponse<GetDataResult<List<GetAllUsersDTO>>>.FailResponse("No startups yet");
 
-            
-            List<GetAllStartupsDTO> DTO =  await _unitOfWork.StartUpRepository.GetAllAsync()
-                .OrderBy(s => s.Id) 
-                .Skip((request.PageIndex - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .Select(s => new GetAllStartupsDTO
-                {
-                    Address = s.Address,
-                    BusinessCategory = s.BusinessCategory,
-                    Description = s.Description,
-                    Email = s.User.Email,
-                    Phone = s.User.PhoneNumber,
-                    ProfileImageUrl = s.User.ProfileImageUrl ?? string.Empty,
-                    StartupName = s.User.Name,
-                    Website = s.Website,
-                    TaxId = s.TaxId
-                }).ToListAsync(cancellationToken);
+            var DTO =  await _unitOfWork.StartUpRepository.GetWithFilterAsync(s=>s.User.IsApproved && s.User.Name != "Admin")
+                                        .OrderByDescending(s => s.CreatedAt) 
+                                        .Skip((request.PageIndex - 1) * request.PageSize)
+                                        .Take(request.PageSize)
+                                        .Select(s => new GetAllUsersDTO
+                                        {
+                                            Id = s.Id,
+                                            ProfileImageUrl = s.User.ProfileImageUrl ?? string.Empty,
+                                            CompanyName = s.CompanyName,
+                                            AccountType = "Startup",
+                                            RegisterAt = s.CreatedAt,
+                                        }).ToListAsync(cancellationToken);
 
-            return new PagedResult<GetAllStartupsDTO>
+            var data =  new GetDataResult<List<GetAllUsersDTO>>
             {
-                Items = DTO,
+                Data = DTO,
                 TotalCount = total,
-                PageIndex = request.PageIndex,
+                PageNumber = request.PageIndex,
                 PageSize = request.PageSize
             };
+
+            return GeneralResponse<GetDataResult<List<GetAllUsersDTO>>>.SuccessResponse("All Startups retrieved successfully", data);
         }
     }
 }

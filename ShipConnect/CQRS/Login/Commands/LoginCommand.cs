@@ -4,6 +4,7 @@ using System.Text;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using ShipConnect.DTOs.AccountDTOs;
 using ShipConnect.Helpers;
 using ShipConnect.Models;
 
@@ -11,10 +12,12 @@ namespace ShipConnect.CQRS.Login.Commands
 {
     public class LoginCommand:IRequest<GeneralResponse<string>>
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
+        public LoginDTO DTO { get; set; }
 
-        public bool RememberMe { get; set; } 
+        public LoginCommand(LoginDTO userFromRequest)
+        {
+            DTO = userFromRequest;            
+        }
     }
 
     public class LoginCommandHandler : IRequestHandler<LoginCommand, GeneralResponse<string>>
@@ -30,12 +33,14 @@ namespace ShipConnect.CQRS.Login.Commands
 
         public async Task<GeneralResponse<string>> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-            ApplicationUser user = await userManager.FindByEmailAsync(request.Email);
+            ApplicationUser user = await userManager.FindByEmailAsync(request.DTO.Email);
 
-            if (user == null || !await userManager.CheckPasswordAsync(user,request.Password))
-            {
+            if (user == null || !await userManager.CheckPasswordAsync(user,request.DTO.Password))
                 return GeneralResponse<string>.FailResponse("Invalid email or password.");
-            }
+
+            if(!user.IsApproved)
+                return GeneralResponse<string>.FailResponse("Your account is pending admin approval.");
+
 
             List<Claim> claims = new List<Claim>()
             {
@@ -56,7 +61,7 @@ namespace ShipConnect.CQRS.Login.Commands
 
             var signInKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecritKey"]));
             var signingCredentials = new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256);
-            var expiresAt = request.RememberMe? DateTime.Now.AddDays(7): DateTime.Now.AddHours(1);
+            var expiresAt = request.DTO.RememberMe? DateTime.Now.AddDays(7): DateTime.Now.AddHours(1);
 
             //Design token
             var token = new JwtSecurityToken(

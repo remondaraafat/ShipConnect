@@ -9,7 +9,7 @@ namespace ShipConnect.Models
         public string Name {  get; set; }
         public string ProfileImageUrl { get; set; }="/images/default-user.png";//default image
 
-        public bool IsApproved { get; set; }  //لو الادمن عاوز يعمل تعطيل لحساب المستخدم
+        public bool IsApproved { get; set; } = false; //لو الادمن عاوز يعمل تعطيل لحساب المستخدم
         public StartUp? Startup { get; set; }
 
         public bool AcceptTerms { get; set; } = false;

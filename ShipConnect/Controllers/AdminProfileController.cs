@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ShipConnect.CQRS.AdminProfileCQRS.Query;
 using ShipConnect.CQRS.UserCQRS.Commands;
+using ShipConnect.CQRS.UserCQRS.Query;
 using ShipConnect.DTOs.UserDTOs;
+using ShipConnect.ShippingCompanies.Querys;
 
 namespace ShipConnect.Controllers
 {
@@ -15,24 +17,34 @@ namespace ShipConnect.Controllers
     {
         private readonly IMediator _mediator;
         public AdminProfileController(IMediator mediator) => _mediator = mediator;
+
+        #region Admin
+
+        [Authorize(Roles ="Admin")]
+        [HttpGet("AllUsers")]
+        public async Task<IActionResult> GetAll(int pageNumber = 1, int pageSize = 10)
+        {
+            var response = await _mediator.Send(new GetAllUsersQuery(pageNumber, pageSize));
+            return response.Success ? Ok(response) : BadRequest(response);
+        }
+
+        #endregion
+
+
+
+
         //get
         [HttpGet("me")]
         public async Task<GeneralResponse<GetUserDTO>> GetMyProfile(CancellationToken cancellationToken)
         {
-            // ✅ استخرج البريد الإلكتروني من التوكن
             var email = User.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrWhiteSpace(email))
-            {
                 return GeneralResponse<GetUserDTO>.FailResponse("Email claim is missing in token.");
-            }
 
-            // 🔍 نفّذ الكويري باستخدام MediatR
             var userDto = await _mediator.Send(new GetUserByEmailQuery { Email = email }, cancellationToken);
 
             if (userDto == null)
-            {
                 return GeneralResponse<GetUserDTO>.FailResponse("Admin profile not found.");
-            }
 
             return GeneralResponse<GetUserDTO>.SuccessResponse("Profile loaded successfully.", userDto);
         }
