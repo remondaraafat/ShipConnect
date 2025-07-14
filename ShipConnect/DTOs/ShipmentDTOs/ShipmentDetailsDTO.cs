@@ -18,6 +18,7 @@
         public string ShippingScope { get; set; }
         public string TransportType { get; set; }
         public DateTime RequestedPickupDate { get; set; }//تاريخ الاستلام المطلوب
+        public int? OffersCount { get; set; }
 
         //sender data
         public string? SenderAddress { get; set; }//عنوان الارسال

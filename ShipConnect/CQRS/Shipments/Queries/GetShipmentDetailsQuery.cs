@@ -32,12 +32,17 @@ namespace ShipConnect.CQRS.Shipments.Queries
             if (company == null)
                 return GeneralResponse<ShipmentDetailsDTO>.FailResponse("User not found");
 
+            int offersCount = await _unitOfWork.OfferRepository
+    .GetWithFilterAsync(o => o.ShipmentId == request.ShipmentId)
+    .CountAsync(cancellationToken);
+
             var shipment = await _unitOfWork.ShipmentRepository
                                             .GetWithFilterAsync(s=>s.Id == request.ShipmentId
                                             && s.Status==ShipmentStatus.Pending)
                                             .Select(s=> new ShipmentDetailsDTO
                                             {
                                                 Id = s.Id,
+                                                OffersCount =  offersCount,
                                                 Code = s.Code,
                                                 RequestDate = s.CreatedAt,
                                                 WeightKg = s.WeightKg,
@@ -55,7 +60,8 @@ namespace ShipConnect.CQRS.Shipments.Queries
                                                 RequestedPickupDate= s.RequestedPickupDate,
                                                 SenderAddress= s.SenderAddress?? "N/A",
                                                 SentDate= s.SentDate,
-                                                CompanyName=s.Startup.CompanyName
+                                                CompanyName=s.Startup.CompanyName,
+
                                             }).FirstOrDefaultAsync(cancellationToken);
 
             if (shipment == null)
