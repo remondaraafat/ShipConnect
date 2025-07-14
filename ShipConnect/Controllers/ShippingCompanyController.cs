@@ -26,17 +26,18 @@ public class ShippingCompanyController : ControllerBase
         return response.Success ? Ok(response) : BadRequest(response);
     }
 
-    #endregion
-
-    #region Shipping Company
-
     [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetAll(int pageNumber = 1, int pageSize = 10)
     {
         var response = await _mediator.Send(new GetAllShippingCompaniesQuery(pageNumber, pageSize));
         return response.Success ? Ok(response) : BadRequest(response);
-    } 
+    }
+
+    #endregion
+
+    #region Shipping Company
+
     #endregion
 
 

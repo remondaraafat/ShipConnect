@@ -18,7 +18,7 @@ namespace ShipConnect.CQRS.StartUps
 
         public async Task<GeneralResponse<int>> Handle(GetTotalStartUpCountQuery request, CancellationToken cancellationToken)
         {
-            int count = _unitOfWork.StartUpRepository.GetAllAsync().Count();
+            int count = await _unitOfWork.StartUpRepository.CountAsync(s=>s.User.IsApproved && s.User.Name != "Admin");
 
             return GeneralResponse<int>.SuccessResponse("Total Startups count retrieved successfully", count);
         }

@@ -33,25 +33,35 @@ namespace ShipConnect.CQRS.Notification.Commands
         {
             var dto=request.NotificationDTO;
 
-            var notification = new ShipConnect.Models.Notification
-            {
-                Title = dto.Title,
-                Message = dto.Message,
-                RecipientId = dto.RecipientId,
-                Type = dto.NotificationType,
-                CreatedAt = DateTime.Now,
-            };
+            var recipients = dto.RecipientIds?? (dto.RecipientId is not null ? new[] { dto.RecipientId } : Array.Empty<string>());
 
-            await _unitOfWork.NotificationRepository.AddAsync(notification);
+            if (!recipients.Any())
+                return GeneralResponse<string>.FailResponse("No recipient specified");
+            
+            var now = DateTime.Now;
+
+            foreach(var userId in recipients)
+            {
+                var notification = new ShipConnect.Models.Notification
+                {
+                    Title = dto.Title,
+                    Message = dto.Message,
+                    RecipientId = userId,
+                    Type = dto.NotificationType,
+                    CreatedAt = now,
+                };
+                await _unitOfWork.NotificationRepository.AddAsync(notification);
+            }
+
             await _unitOfWork.SaveAsync();
 
-            await hubContext.Clients.User(dto.RecipientId).SendAsync("ReceiveNotification", new
+            await hubContext.Clients.Users(recipients).SendAsync("ReceiveNotification", new
             {
-                notification.Title,
-                notification.Message,
-                notification.Type,
-                notification.CreatedAt,
-            });
+                dto.Title,
+                dto.Message,
+                Type= dto.NotificationType,
+                CreatedAt = now,
+            },cancellationToken);
 
             return GeneralResponse<string>.SuccessResponse("Notification sent and saved successfully");
         }

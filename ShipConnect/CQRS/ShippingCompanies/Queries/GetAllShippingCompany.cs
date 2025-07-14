@@ -2,7 +2,7 @@
 
 namespace ShipConnect.ShippingCompanies.Querys
 {
-    public class GetAllShippingCompaniesQuery : IRequest<GeneralResponse<GetDataResult<List<ShippingCompanyDto>>>> 
+    public class GetAllShippingCompaniesQuery : IRequest<GeneralResponse<GetDataResult<List<GetAllUsersDTO>>>> 
     {
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
@@ -14,7 +14,7 @@ namespace ShipConnect.ShippingCompanies.Querys
         }
     }
 
-    public class GetAllShippingCompaniesHandler : IRequestHandler<GetAllShippingCompaniesQuery, GeneralResponse<GetDataResult<List<ShippingCompanyDto>>>>
+    public class GetAllShippingCompaniesHandler : IRequestHandler<GetAllShippingCompaniesQuery, GeneralResponse<GetDataResult<List<GetAllUsersDTO>>>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -23,38 +23,35 @@ namespace ShipConnect.ShippingCompanies.Querys
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<GeneralResponse<GetDataResult<List<ShippingCompanyDto>>>> Handle(GetAllShippingCompaniesQuery request, CancellationToken cancellationToken)
+        public async Task<GeneralResponse<GetDataResult<List<GetAllUsersDTO>>>> Handle(GetAllShippingCompaniesQuery request, CancellationToken cancellationToken)
         {
+            int total = await _unitOfWork.ShippingCompanyRepository.CountAsync(s => s.User.IsApproved && s.User.Name != "Admin");
+            if (total == 0)
+                return GeneralResponse<GetDataResult<List<GetAllUsersDTO>>>.SuccessResponse("No shipping companies yet");
+
             var companies = await _unitOfWork.ShippingCompanyRepository
-                                    .GetAllAsync()
+                                    .GetWithFilterAsync(c=>c.User.IsApproved && c.User.Name != "Admin")
                                     .OrderByDescending(c=>c.CreatedAt)
                                     .Skip((request.PageNumber-1)*request.PageSize)
                                     .Take(request.PageSize)
-                                    .Select(entity => new ShippingCompanyDto
+                                    .Select(entity => new GetAllUsersDTO
                                     {
                                         Id = entity.Id,
-                                        CompanyName = entity.CompanyName,
                                         ProfileImageUrl = entity.User.ProfileImageUrl,
-                                        Description = entity.Description,
-                                        Address = entity.Address,
-                                        Phone = entity.Phone,
-                                        Website = entity.Website,
-                                        LicenseNumber = entity.LicenseNumber,
-                                        UserId = entity.UserId,
-                                        TransportType = entity.TransportType,
-                                        ShippingScope = entity.ShippingScope,
-                                        TaxId = entity.TaxId
+                                        CompanyName = entity.CompanyName,
+                                        AccountType = "Shipping Company",
+                                        RegisterAt = entity.CreatedAt
                                     }).ToListAsync(cancellationToken);
 
-            var dateResult = new GetDataResult<List<ShippingCompanyDto>>
+            var dateResult = new GetDataResult<List<GetAllUsersDTO>>
             {
                 Data = companies,
-                TotalCount = await _unitOfWork.ShippingCompanyRepository.CountAsync(),
+                TotalCount = total,
                 PageNumber = request.PageNumber,
                 PageSize = request.PageSize,
             };
 
-            return GeneralResponse<GetDataResult<List<ShippingCompanyDto>>>.SuccessResponse("All shipping companies fetched successfully", dateResult);
+            return GeneralResponse<GetDataResult<List<GetAllUsersDTO>>>.SuccessResponse("All shipping companies fetched successfully", dateResult);
         }
     }
 }

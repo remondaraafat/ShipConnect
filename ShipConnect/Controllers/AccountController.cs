@@ -2,16 +2,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using MediatR;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using ShipConnect.CQRS.Login.Commands;
 using ShipConnect.CQRS.Register.Commands;
+using ShipConnect.CQRS.Register.Queries;
 using ShipConnect.DTOs.AccountDTOs;
-using ShipConnect.Helpers;
-using ShipConnect.Models;
-//using JwtRegisteredClaimNames = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames;
 
 
 namespace ShipConnect.Controllers
@@ -27,6 +23,8 @@ namespace ShipConnect.Controllers
             this._mediator = mediator;
         }
 
+        #region Account
+
         [HttpPost("register/startUp")]
         public async Task<IActionResult> RegisterAsStartUp([FromBody] RegisterAsStartUpDTO userFromRequest)
         {
@@ -34,7 +32,7 @@ namespace ShipConnect.Controllers
             {
                 var command = new RegisterAsStartUpCommand
                 {
-                    
+
                     CompanyName = userFromRequest.CompanyName,
                     Email = userFromRequest.Email,
                     Phone = userFromRequest.Phone,
@@ -95,22 +93,31 @@ namespace ShipConnect.Controllers
             return BadRequest(GeneralResponse<List<string>>.FailResponse("Validation Failed", errors));
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpGet("pending-accounts")]
+        public async Task<IActionResult> GetPendingAccounts(int PageNumber = 1, int PageSize = 10)
+        {
+            var response = await _mediator.Send(new GetPendingAccountsQuery(PageNumber, PageSize));
+            return response.Success ? Ok(response) : NotFound(response);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("approve-account/{userId}")]
+        public async Task<IActionResult> ApproveAccount(string userId)
+        {
+            var response = await _mediator.Send(new ApproveAccountCommand(userId));
+            return response.Success ? Ok(response) : BadRequest(response);
+        }
+
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginDTO userFromRequest)
         {
             if (ModelState.IsValid)
             {
-                var command = new LoginCommand
-                {
-                    Email = userFromRequest.Email,
-                    Password = userFromRequest.Password,
-                    RememberMe= userFromRequest.RememberMe
-                    
-                };
 
-                var result = await _mediator.Send(command);
+                var result = await _mediator.Send(new LoginCommand(userFromRequest));
 
-                return result.Success? Ok(result) : Unauthorized(result);
+                return result.Success ? Ok(result) : Unauthorized(result);
 
             }
             var errors = ModelState.Values
@@ -119,6 +126,8 @@ namespace ShipConnect.Controllers
             .ToList();
 
             return BadRequest(GeneralResponse<List<string>>.FailResponse("Validation Failed", errors));
-        }
+        } 
+
+        #endregion
     }
 }

@@ -18,7 +18,7 @@ namespace ShipConnect.Controllers
 
         public StartUpController(IMediator mediator) => _mediator = mediator;
 
-        
+        #region Admin
         [Authorize(Roles = "Admin")]
         [HttpGet("total-count")]
         public async Task<IActionResult> GetTotalStartUpCount()
@@ -26,6 +26,18 @@ namespace ShipConnect.Controllers
             var response = await _mediator.Send(new GetTotalStartUpCountQuery());
             return response.Success ? Ok(response) : BadRequest(response);
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("All")]
+        public async Task<IActionResult> GetAllStartups( int pageIndex = 1, int pageSize = 10)
+        {
+            var response = await _mediator.Send(new GetAllStartupsQuery(pageIndex,pageSize));
+            return response.Success ? Ok(response) : BadRequest(response);
+
+        }
+
+        #endregion
+
 
         [Authorize]
         [HttpGet] //get by email
@@ -77,18 +89,7 @@ namespace ShipConnect.Controllers
         }
         //get all startups
         //[Authorize]
-        [HttpGet("All")]
-        public async Task<GeneralResponse<object>> GetAllStartups([FromQuery] int pageIndex = 1,
-    [FromQuery] int pageSize = 10)
-        {
-            return GeneralResponse<object>.SuccessResponse(
-                "Success",
-                await _mediator.Send(new GetAllStartupsQuery {
-                    PageIndex = pageIndex,
-                    PageSize = pageSize
-                })
-            );
-        }
+
         //get count of startups
         [Authorize]
         [HttpGet("Count")]

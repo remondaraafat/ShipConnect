@@ -4,9 +4,9 @@ using ShipConnect.Helpers;
 
 namespace ShipConnect.CQRS.Notification.Queries
 {
-    public class GetUserNotificationsQuery:IRequest<GeneralResponse<GetDataResult<List<NotificationDTO>>>>   
+    public class GetUserNotificationsQuery : IRequest<GeneralResponse<GetDataResult<List<NotificationDTO>>>>
     {
-        public string UserId { get;}
+        public string UserId { get; }
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
 
@@ -27,6 +27,7 @@ namespace ShipConnect.CQRS.Notification.Queries
             _unitOfWork = unitOfWork;
         }
 
+   
         public async Task<GeneralResponse<GetDataResult<List<NotificationDTO>>>> Handle(GetUserNotificationsQuery request, CancellationToken cancellationToken)
         {
 
