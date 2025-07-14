@@ -1,10 +1,18 @@
-﻿namespace ShipConnect.DTOs.ChatDTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ShipConnect.DTOs.ChatDTOs
 {
     public class SendChatMessageRequestDTO
     {
-        public string SenderId { get; set; } = string.Empty;
-        public string ReceiverId { get; set; } = string.Empty;
-        public string Content { get; set; } = string.Empty;
+        [Required]
+
+        public string SenderId { get; set; } 
+        [Required]
+
+        public string ReceiverId { get; set; } 
+        [Required]
+
+        public string Content { get; set; }
         public int? ShipmentId { get; set; }
     }
 }
