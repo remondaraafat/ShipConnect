@@ -110,41 +110,6 @@ namespace ShipConnect.CQRS.Register.Commands
             // 2) تُرسل فورًا عبر SignalR
             await hubContext.Clients.Users(admins.Select(a => a.Id)).SendAsync("NewApprovalRequest", notification, cancellationToken);
 
-            // send email to admin
-            var emails = admins.Select(u => u.Email);
-            foreach (var email in emails)
-            {
-                await _emailService.SendEmailAsync(
-                toEmail: email,
-                subject: "New Startup Registration - Approval Needed",
-                body: $@"
-                        <div style='max-width:600px;margin:auto;font-family:Arial;padding:30px;
-                                    background:#f9f9f9;border-radius:10px;border:1px solid #ddd;color:#333'>
-                            <h2 style='color:#2a7ae2'>🚛 New Startup Awaiting Approval</h2>
-                            <p><strong>Company Name:</strong> {request.CompanyName}</p>
-                            <p><strong>Email:</strong> {request.Email}</p>
-                            <p><strong>Phone:</strong> {request.Phone}</p>
-                            <p><strong>Address:</strong> {request.Address}</p>
-                            <p><strong>Business Category:</strong> {request.BusinessCategory}</p>
-                            <p><strong>Description:</strong> {(request.Description ?? "N/A")}</p>
-                            <p><strong>Website:</strong> {(request.Website ?? "N/A")}</p>
-                            <p><strong>Tax ID:</strong> {(request.TaxId ?? "N/A")}</p>
-                            <hr style='margin:30px 0;border:none;border-top:1px solid #eee'>
-                            <p>
-                                You can review and approve this registration from the admin dashboard.
-                            </p>
-                            <a href='https://yourdomain.com/admin/startups/pending' 
-                                style='display:inline-block;margin-top:20px;padding:10px 20px;
-                                background-color:#2a7ae2;color:white;border-radius:5px;text-decoration:none'>
-                                Review Now
-                            </a>
-                            <footer style='font-size:13px;color:#888;margin-top:40px;text-align:center'>
-                                © {DateTime.Now.Year} ShipConnect. All rights reserved.
-                            </footer>
-                        </div>"
-                );
-            }
-
 
             //email to user
 

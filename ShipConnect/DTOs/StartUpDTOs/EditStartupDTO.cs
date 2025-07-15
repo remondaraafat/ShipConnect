@@ -4,9 +4,6 @@ namespace ShipConnect.DTOs.StartUpDTOs
 {
     public class EditStartupDTO
     {
-
-        
-
         [StringLength(1000, ErrorMessage = "Description can't exceed 1000 characters.")]
         public string? Description { get; set; }
 

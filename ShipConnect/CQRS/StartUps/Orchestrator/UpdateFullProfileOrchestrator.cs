@@ -19,11 +19,7 @@ namespace ShipConnect.CQRS.StartUps.Orchestrator
         }
         public async Task<bool> Handle(UpdateFullProfileOrchestrator request, CancellationToken cancellationToken)
         {
-            var userResult = await _mediator.Send(new EditUserCommand
-            {
-                Id = request.Id,
-                DTO = request.DTO.UserDTO
-            });
+            var userResult = await _mediator.Send(new EditUserCommand(request.Id, request.DTO.UserDTO), cancellationToken);
 
             bool startupOk = false;
             if (userResult.Succeeded)

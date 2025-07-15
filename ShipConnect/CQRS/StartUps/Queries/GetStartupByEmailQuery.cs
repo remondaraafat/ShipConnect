@@ -1,7 +1,4 @@
-﻿
-
-
-namespace ShipConnect.CQRS.StartUps.Queries
+﻿namespace ShipConnect.CQRS.StartUps.Queries
 {
     public class GetStartupByEmailQuery : IRequest<GetStartupByEmailDTO>
     {
@@ -16,7 +13,7 @@ namespace ShipConnect.CQRS.StartUps.Queries
         }
         public async Task<GetStartupByEmailDTO> Handle(GetStartupByEmailQuery request, CancellationToken cancellationToken)
         {
-           // var query = await _unitOfWork.StartUpRepository.GetWithFilterAsync(s => s.User.Email == request.Email);
+            // var query = await _unitOfWork.StartUpRepository.GetWithFilterAsync(s => s.User.Email == request.Email);
             return await _unitOfWork.StartUpRepository.GetWithFilterAsync(s => s.User.Email == request.Email).Select(s => new GetStartupByEmailDTO
             {
                 Email = s.User.Email,

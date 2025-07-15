@@ -25,7 +25,7 @@ namespace ShipConnect.CQRS.UserCQRS.Query
 
         public async Task<GeneralResponse<GetDataResult<List<GetAllUsersDTO>>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
-            var startUps = _unitOfWork.StartUpRepository.GetWithFilterAsync(s=>s.User.IsApproved&&s.User.Name!="Admin")
+            var startUps = _unitOfWork.StartUpRepository.GetWithFilterAsync(s=>s.User.IsApproved&&s.CompanyName.ToUpper()!="ADMIN")
                                         .Select(s => new GetAllUsersDTO
                                         {
                                             Id = s.Id,
@@ -35,7 +35,7 @@ namespace ShipConnect.CQRS.UserCQRS.Query
                                             RegisterAt = s.CreatedAt,
                                         });
 
-            var companies = _unitOfWork.ShippingCompanyRepository.GetWithFilterAsync(c => c.User.IsApproved && c.User.Name != "Admin")
+            var companies = _unitOfWork.ShippingCompanyRepository.GetWithFilterAsync(c => c.User.IsApproved && c.CompanyName.ToLower() != "ADMIN")
                                         .Select(entity => new GetAllUsersDTO
                                         {
                                             Id = entity.Id,

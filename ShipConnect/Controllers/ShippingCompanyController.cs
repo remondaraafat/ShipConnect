@@ -16,7 +16,7 @@ public class ShippingCompanyController : ControllerBase
         _mediator = mediator;
     }
 
-    #region Admin
+    #region Admin & Shipping Company
 
     [Authorize(Roles = "Admin")]
     [HttpGet("total-count")]
@@ -34,27 +34,7 @@ public class ShippingCompanyController : ControllerBase
         return response.Success ? Ok(response) : BadRequest(response);
     }
 
-    #endregion
-
-    #region Shipping Company
-
-    #endregion
-
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
-    {
-        var response = await _mediator.Send(new GetShippingCompanyByIdQuery(id));
-        return response.Success ? Ok(response) : NotFound(response);
-    }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] CreateShippingCompanyDto dto)
-    {
-        var response = await _mediator.Send(new UpdateShippingCompanyCommand(id, dto));
-        return response.Success ? Ok(response) : NotFound(response);
-    }
-
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -62,11 +42,30 @@ public class ShippingCompanyController : ControllerBase
         return response.Success ? Ok(response) : NotFound(response);
     }
 
-
-    [HttpGet("search")]
-    public async Task<IActionResult> SearchByName([FromQuery] string name)
+    [Authorize]
+    [HttpGet("CompanyProfile/{companyId:int}")]
+    public async Task<IActionResult> GeCompanyProfileById(int companyId)
     {
-        var response = await _mediator.Send(new SearchShippingCompaniesByNameQuery(name));
+        var response = await _mediator.Send(new GetShippingCompanyByIdQuery(companyId, userId: null));
         return response.Success ? Ok(response) : NotFound(response);
     }
+
+    #endregion
+
+   
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, [FromBody] CreateShippingCompanyDto dto)
+    {
+        var response = await _mediator.Send(new UpdateShippingCompanyCommand(id, dto));
+        return response.Success ? Ok(response) : NotFound(response);
+    }
+
+
+
+    //[HttpGet("search")]
+    //public async Task<IActionResult> SearchByName([FromQuery] string name)
+    //{
+    //    var response = await _mediator.Send(new SearchShippingCompaniesByNameQuery(name));
+    //    return response.Success ? Ok(response) : NotFound(response);
+    //}
 }

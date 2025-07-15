@@ -4,8 +4,8 @@
     {
         public int Id { get; set; }
         public string CompanyName { get; set; } = string.Empty;
-        public string ProfileImageUrl { get; set; }
-        public string AccountType { get; set; }
+        public string? ProfileImageUrl { get; set; }
+        public string? AccountType { get; set; }
         public DateTime RegisterAt { get; set; }
     }
 }

@@ -34,8 +34,9 @@ namespace ShipConnect.CQRS.Register.Queries
                                         .Take(request.PageSize)
                                         .Select(u=>new PendingAccountDTO
                                         {
-                                            UserId= u.Id,
-                                            AccountType=u.Startup != null? "Startup": "Shipping Company",
+                                            Id= u.Startup != null ? u.Startup.Id : u.ShippingCompany.Id,
+                                            UerId = u.Id,
+                                            AccountType =u.Startup != null? "Startup": "Shipping Company",
                                             Email=u.Email,
                                             Name=u.Startup != null? u.Startup.CompanyName:u.ShippingCompany.CompanyName,
                                             ProfileImageUrl=u.ProfileImageUrl,
@@ -46,7 +47,6 @@ namespace ShipConnect.CQRS.Register.Queries
             if (!users.Any())
                 return GeneralResponse<GetDataResult<List<PendingAccountDTO>>>.FailResponse("No pending accounts.");
 
-
             var dataResult = new GetDataResult<List<PendingAccountDTO>>
             {
                 Data = users,
@@ -55,7 +55,6 @@ namespace ShipConnect.CQRS.Register.Queries
                 PageSize = request.PageSize
             };
             return GeneralResponse<GetDataResult<List<PendingAccountDTO>>>.SuccessResponse("Pending accounts retreved successfully", dataResult);
-
         }
     }
 }

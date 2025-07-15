@@ -59,7 +59,6 @@ namespace ShipConnect.ShippingCompanies.Commands
                 Phone = entity.Phone,
                 Website = entity.Website,
                 LicenseNumber = entity.LicenseNumber,
-                UserId = entity.UserId,
                 TransportType = entity.TransportType,
                 ShippingScope = entity.ShippingScope,
                 TaxId = entity.TaxId

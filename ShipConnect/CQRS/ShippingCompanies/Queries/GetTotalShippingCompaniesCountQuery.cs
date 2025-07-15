@@ -19,7 +19,7 @@ namespace ShipConnect.CQRS.ShippingCompanies.Queries
 
         public async Task<GeneralResponse<int>> Handle(GetTotalShippingCompaniesCountQuery request, CancellationToken cancellationToken)
         {
-            int count = await _unitOfWork.ShippingCompanyRepository.CountAsync(c=>c.User.IsApproved && c.User.Name != "Admin");
+            int count = await _unitOfWork.ShippingCompanyRepository.CountAsync(c=>c.User.IsApproved && c.CompanyName.ToUpper() != "ADMIN");
             
             return GeneralResponse<int>.SuccessResponse("Total shipping companies count retrieved successfully", count);
         }
