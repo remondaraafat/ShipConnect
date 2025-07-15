@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ShipConnect.CQRS.ShippingCompanies.Queries;
 using ShipConnect.DTOs.ShippingCompanies;
@@ -50,22 +51,38 @@ public class ShippingCompanyController : ControllerBase
         return response.Success ? Ok(response) : NotFound(response);
     }
 
-    #endregion
-
-   
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] CreateShippingCompanyDto dto)
+    [Authorize(Roles = "ShippingCompany")]
+    [HttpGet("MyProfile")]
+    public async Task<IActionResult> GeMyProfileById(int companyId)
     {
-        var response = await _mediator.Send(new UpdateShippingCompanyCommand(id, dto));
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized();
+
+        var response = await _mediator.Send(new GetShippingCompanyByIdQuery(null, userId));
         return response.Success ? Ok(response) : NotFound(response);
     }
 
+    [Authorize(Roles = "ShippingCompany")]
+    [HttpPut("updateProfile")]
+    public async Task<IActionResult> Update([FromBody] CreateShippingCompanyDto dto)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            return Unauthorized();
+
+        var response = await _mediator.Send(new UpdateShippingCompanyCommand(userId, dto));
+        return response.Success ? Ok(response) : NotFound(response);
+    }
+
+    #endregion
 
 
-    //[HttpGet("search")]
-    //public async Task<IActionResult> SearchByName([FromQuery] string name)
-    //{
-    //    var response = await _mediator.Send(new SearchShippingCompaniesByNameQuery(name));
-    //    return response.Success ? Ok(response) : NotFound(response);
-    //}
+
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchByName([FromQuery] string name)
+    {
+        var response = await _mediator.Send(new SearchShippingCompaniesByNameQuery(name));
+        return response.Success ? Ok(response) : NotFound(response);
+    }
 }

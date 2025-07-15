@@ -42,7 +42,8 @@
                                     Phone = s.Phone ?? "N/A",
                                     ProfileImageUrl = s.User.ProfileImageUrl,
                                     StartupName = s.CompanyName,
-                                    TaxId = s.TaxId ?? "N/A"
+                                    TaxId = s.TaxId ?? "N/A",
+                                    Website = s.Website ??"N/A"
                                 }).FirstOrDefaultAsync(cancellationToken);
 
                 if (data == null)

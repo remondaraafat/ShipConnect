@@ -7,12 +7,12 @@ namespace ShipConnect.ShippingCompanies.Commands
 {
     public class UpdateShippingCompanyCommand : IRequest<GeneralResponse<ShippingCompanyDto>>
     {
-        public int Id { get; set; }
+        public string UserId { get;}
         public CreateShippingCompanyDto Dto { get; set; }
 
-        public UpdateShippingCompanyCommand(int id, CreateShippingCompanyDto dto)
+        public UpdateShippingCompanyCommand(string userId, CreateShippingCompanyDto dto)
         {
-            Id = id;
+            UserId = userId;
             Dto = dto;
         }
     }
@@ -28,40 +28,40 @@ namespace ShipConnect.ShippingCompanies.Commands
 
         public async Task<GeneralResponse<ShippingCompanyDto>> Handle(UpdateShippingCompanyCommand request, CancellationToken cancellationToken)
         {
-            var entity = await _unitOfWork.ShippingCompanyRepository.GetByIdAsync(request.Id);
-            if (entity == null)
-            {
+            var company = await _unitOfWork.ShippingCompanyRepository.GetWithFilterAsync(c=>c.UserId==request.UserId&&c.User.IsApproved).Include(c=>c.User).FirstOrDefaultAsync(cancellationToken);
+
+            if (company == null)
                 return GeneralResponse<ShippingCompanyDto>.FailResponse("Shipping company not found");
-            }
 
-            entity.CompanyName = request.Dto.CompanyName;
-            entity.Description = request.Dto.Description;
-            //entity.City = request.Dto.City;
-            entity.Address = request.Dto.Address;
-            entity.Phone = request.Dto.Phone;
-            entity.Website = request.Dto.Website;
-            entity.LicenseNumber = request.Dto.LicenseNumber;
-            entity.UserId = request.Dto.UserId;
-            entity.TransportType = request.Dto.TransportType;
-            entity.ShippingScope = request.Dto.ShippingScope;
-            entity.TaxId = request.Dto.TaxId;
+            company.CompanyName = request.Dto.CompanyName;
+            company.Description = request.Dto.Description;
+            company.Address = request.Dto.Address;
+            company.Phone = request.Dto.Phone;
+            company.Website = request.Dto.Website;
+            company.LicenseNumber = request.Dto.LicenseNumber;
+            company.TransportType = request.Dto.TransportType;
+            company.ShippingScope = request.Dto.ShippingScope;
+            company.TaxId = request.Dto.TaxId;
 
-            _unitOfWork.ShippingCompanyRepository.Update(entity);
+            if (!string.IsNullOrWhiteSpace(request.Dto.Email))
+                company.User.Email = request.Dto.Email;
+
+            _unitOfWork.ShippingCompanyRepository.Update(company);
             await _unitOfWork.SaveAsync();
 
             var dto = new ShippingCompanyDto
             {
-                Id = entity.Id,
-                CompanyName = entity.CompanyName,
-                Description = entity.Description,
-                //City = entity.City,
-                Address = entity.Address,
-                Phone = entity.Phone,
-                Website = entity.Website,
-                LicenseNumber = entity.LicenseNumber,
-                TransportType = entity.TransportType,
-                ShippingScope = entity.ShippingScope,
-                TaxId = entity.TaxId
+                Id = company.Id,
+                CompanyName = company.CompanyName,
+                Description = company.Description,
+                Address = company.Address,
+                Phone = company.Phone,
+                Website = company.Website,
+                LicenseNumber = company.LicenseNumber,
+                TransportType = company.TransportType,
+                ShippingScope = company.ShippingScope,
+                TaxId = company.TaxId,
+                Email = company.User.Email,                
             };
 
             return GeneralResponse<ShippingCompanyDto>.SuccessResponse("Shipping company updated successfully", dto);

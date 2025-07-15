@@ -108,9 +108,8 @@ namespace ShipConnect.Controllers
             );
         }
 
-        #endregion
-
         //get my startup profile
+        [Authorize(Roles = "Startup")]
         [HttpGet("me")]
         public async Task<GeneralResponse<GetStartupByIdDTO>> GetMyStartupProfile(CancellationToken cancellationToken)
         {
@@ -135,5 +134,7 @@ namespace ShipConnect.Controllers
             return GeneralResponse<GetStartupByIdDTO>.SuccessResponse("Profile loaded", dto);
         }
     
+        #endregion
+
     }
 }
