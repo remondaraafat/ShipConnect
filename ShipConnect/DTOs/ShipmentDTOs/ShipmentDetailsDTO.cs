@@ -11,7 +11,7 @@
         public string Dimensions { get; set; }
         public string ShipmentType { get; set; } // نوع الشحنة (مثلاً: أجهزة، أوراق، ...)
         public string Status { get; set; }
-        public string? Packaging { get; set; }
+        //public string? Packaging { get; set; }
         public string PackagingOptions { get; set; }
         public string? Description { get; set; }
         public string DestinationAddress { get; set; }

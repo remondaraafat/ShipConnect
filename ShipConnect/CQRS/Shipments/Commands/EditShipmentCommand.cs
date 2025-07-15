@@ -52,7 +52,7 @@ namespace ShipConnect.CQRS.Shipments.Commands
             shipment.DestinationAddress = request.DTO.DestinationAddress;
             shipment.TransportType = request.DTO.TransportType;
             shipment.ShippingScope = request.DTO.ShippingScope;
-            shipment.Packaging = request.DTO.Packaging;
+            //shipment.Packaging = request.DTO.Packaging;
             shipment.Description = request.DTO.Description;
             shipment.ShipmentType = request.DTO.ShipmentType;
             shipment.RequestedPickupDate = request.DTO.RequestedPickupDate;

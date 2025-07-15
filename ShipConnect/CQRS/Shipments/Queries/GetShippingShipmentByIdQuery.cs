@@ -44,7 +44,7 @@ namespace ShipConnect.CQRS.Shipments.Queries
                                     Dimensions = s.Shipment.Dimensions ?? "N/A",
                                     ShipmentType = s.Shipment.ShipmentType,
                                     Status = Regex.Replace(s.Shipment.Status.ToString(), "(\\B[A-Z])", " $1"), // من Pending إلى "Pending", FromOutForDelivery إلى "Out For Delivery"
-                                    Packaging = s.Shipment.Packaging ?? "N/A",
+                                    //Packaging = s.Shipment.Packaging ?? "N/A",
                                     PackagingOptions = s.Shipment.PackagingOptions.ToString(),
                                     Description = s.Shipment.Description ?? "N/A",
                                     DestinationAddress = s.Shipment.DestinationAddress,
