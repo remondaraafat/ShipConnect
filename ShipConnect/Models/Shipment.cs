@@ -23,7 +23,7 @@ namespace ShipConnect.Models
         public TransportType TransportType { get; set; }
         public ShippingScope ShippingScope { get; set; }
         public DateTime RequestedPickupDate { get; set; }//تاريخ الاستلام المطلوب
-        public string? Packaging { get; set; }
+        //public string? Packaging { get; set; }
         public ShipmentStatus Status { get; set; } = ShipmentStatus.Pending;
         public PackagingOptions PackagingOptions { get; set; }
         public string? Description { get; set; }

@@ -4,7 +4,11 @@ namespace ShipConnect.CQRS.Shipments.Queries
 {
     public class AdminStartUpStatusCountQuery : IRequest<GeneralResponse<GetAllStatusCountDTO>>
     {
-        public int StartUpID { get; set; }
+        public int StartUpID { get;}
+        public AdminStartUpStatusCountQuery(int startupId)
+        {
+            StartUpID = startupId;
+        }
     }
 
     public class AdminStartUpStatusCountQueryHandler : IRequestHandler<AdminStartUpStatusCountQuery, GeneralResponse<GetAllStatusCountDTO>>
@@ -19,24 +23,37 @@ namespace ShipConnect.CQRS.Shipments.Queries
         public async Task<GeneralResponse<GetAllStatusCountDTO>> Handle(AdminStartUpStatusCountQuery request, CancellationToken cancellationToken)
         {
             var startUp = await UnitOfWork.StartUpRepository.GetFirstOrDefaultAsync(s => s.Id == request.StartUpID);
-
             if (startUp == null)
                 return GeneralResponse<GetAllStatusCountDTO>.FailResponse("Startup not found");
 
             var shipment = UnitOfWork.ShipmentRepository.GetWithFilterAsync(s => s.StartupId == startUp.Id);
-            if (shipment == null)
-                return GeneralResponse<GetAllStatusCountDTO>.FailResponse("You didn't add any shipment");
+            
+            var grouped = await shipment.GroupBy(s => 1) // يتأكد أننا نرجع صفًّا واحدًا
+                            .Select(g => new
+                            {
+                                Total = g.Count(),
+                                Pending = g.Count(s => s.Status == ShipmentStatus.Pending),
+                                Preparing = g.Count(s => s.Status == ShipmentStatus.Preparing),
+                                InTransit = g.Count(s => s.Status == ShipmentStatus.InTransit),
+                                AtWarehouse = g.Count(s => s.Status == ShipmentStatus.AtWarehouse),
+                                OutForDelivery = g.Count(s => s.Status == ShipmentStatus.OutForDelivery),
+                                Delivered = g.Count(s => s.Status == ShipmentStatus.Delivered),
+                                Failed = g.Count(s => s.Status == ShipmentStatus.Failed)
+                            }).FirstOrDefaultAsync(cancellationToken);
+
+            if (grouped == null || grouped.Total == 0)
+                return GeneralResponse<GetAllStatusCountDTO>.FailResponse("No Shipments yet");
 
             var data = new GetAllStatusCountDTO
             {
-                Pending = shipment.Count(c => c.Status == ShipmentStatus.Pending),
-                Preparing = shipment.Count(c => c.Status == ShipmentStatus.Preparing),
-                InTransit = shipment.Count(c => c.Status == ShipmentStatus.InTransit),
-                AtWarehouse = shipment.Count(c => c.Status == ShipmentStatus.AtWarehouse),
-                OutForDelivery = shipment.Count(c => c.Status == ShipmentStatus.OutForDelivery),
-                Delivered = shipment.Count(c => c.Status == ShipmentStatus.Delivered),
-                Failed = shipment.Count(c => c.Status == ShipmentStatus.Failed),
-                TotalCount = shipment.Count()
+                TotalCount = grouped.Total,
+                Pending = grouped.Pending,
+                Preparing = grouped.Preparing,
+                InTransit = grouped.InTransit,
+                AtWarehouse = grouped.AtWarehouse,
+                OutForDelivery = grouped.OutForDelivery,
+                Delivered = grouped.Delivered,
+                Failed = grouped.Failed
             };
 
             return GeneralResponse<GetAllStatusCountDTO>.SuccessResponse("All Shipments status count retrieved successfully", data);

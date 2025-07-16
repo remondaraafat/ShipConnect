@@ -1,10 +1,8 @@
 ﻿namespace ShipConnect.DTOs.StartUpDTOs
 {
-    public class GetAllStartupsDTO
+    public class GetAllStartupsDTO:GetAllUsersDTO
     {
-        public string StartupName { get; set; } = string.Empty;
 
-        public string ProfileImageUrl { get; set; }
         public string? Description { get; set; }
 
 
@@ -22,3 +20,4 @@
         public string? TaxId { get; set; }
     }
 }
+

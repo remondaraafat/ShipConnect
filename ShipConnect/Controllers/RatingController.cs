@@ -35,6 +35,10 @@ namespace ShipConnect.Controllers
             return response.Success ? Ok(response) : BadRequest(response);
         }
 
+        #endregion
+
+        #region Shipping Company
+
         [Authorize(Roles = "ShippingCompany")]
         [HttpGet("LastRate")]
         public async Task<IActionResult> LastRate()
@@ -44,6 +48,19 @@ namespace ShipConnect.Controllers
                 return Unauthorized();
 
             var response = await _mediator.Send(new LastRateQuery(userId));
+            return response.Success ? Ok(response) : BadRequest(response);
+        }
+
+
+        #endregion
+
+        #region Admin
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("CompanyRates/{companyId:int}")]
+        public async Task<IActionResult> GetCompanyRates(int companyId, int pageNumber = 1, int pageSize = 5)
+        {
+            var response = await _mediator.Send(new CompanyRatesQuery(companyId,pageNumber,pageSize));
             return response.Success ? Ok(response) : BadRequest(response);
         }
 

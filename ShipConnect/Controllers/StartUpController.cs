@@ -7,6 +7,7 @@ using ShipConnect.CQRS.ShippingCompanies.Queries;
 using ShipConnect.CQRS.StartUps;
 using ShipConnect.CQRS.StartUps.Orchestrator;
 using ShipConnect.CQRS.StartUps.Queries;
+using ShipConnect.Models;
 
 namespace ShipConnect.Controllers
 {
@@ -18,17 +19,48 @@ namespace ShipConnect.Controllers
 
         public StartUpController(IMediator mediator) => _mediator = mediator;
 
-        
+        #region Admin
+
+        //get count of startups
         [Authorize(Roles = "Admin")]
         [HttpGet("total-count")]
-        public async Task<IActionResult> GetTotalStartUpCount()
+        public async Task<GeneralResponse<int>> GetCountOfStartups()
         {
-            var response = await _mediator.Send(new GetTotalStartUpCountQuery());
-            return response.Success ? Ok(response) : BadRequest(response);
+            return GeneralResponse<int>.SuccessResponse("Success", await _mediator.Send(new GetCountOfStartupsQuery()));
         }
 
-        [Authorize]
-        [HttpGet] //get by email
+        //get all startups
+        [Authorize(Roles = "Admin")]
+        [HttpGet("All")]
+        public async Task<GeneralResponse<object>> GetAllStartups([FromQuery] int pageIndex = 1,
+    [FromQuery] int pageSize = 10)
+        {
+            return GeneralResponse<object>.SuccessResponse(
+                "Success",
+                await _mediator.Send(new GetAllStartupsQuery
+                {
+                    PageIndex = pageIndex,
+                    PageSize = pageSize
+                })
+            );
+        }
+        
+        [Authorize("Admin")]
+        [HttpGet("StartUpProfile/{startUpId:int}")] 
+        public async Task<IActionResult> GetStartupProfileById(int startUpId,CancellationToken cancellationToken)
+        {
+            var response = await _mediator.Send(new GetStartupProfileQuery(startUpId, userId:null));
+            return response.Success ? Ok(response) : NotFound(response);
+        }
+
+
+        #endregion
+
+        #region Startup
+
+        //get by email
+        [Authorize(Roles = "Startup")]
+        [HttpGet] 
         public async Task<IActionResult> GetStartupProfileByEmail([FromQuery] string email, CancellationToken cancellationToken)
         {
             var dto = await _mediator.Send(
@@ -41,12 +73,12 @@ namespace ShipConnect.Controllers
             return Ok(dto);
         }
         
-        [Authorize]
-        [HttpPut] // PUT api/profile/update-my
+        // PUT api/profile/update-my
+        [Authorize(Roles= "Startup")]
+        [HttpPut] 
         public async Task<GeneralResponse<object>> UpdateMyStartupProfile([FromBody] UpdateFullProfileDTO requestDto, CancellationToken cancellationToken)
         {
             string Id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                        
 
             if (string.IsNullOrEmpty(Id))
             {
@@ -75,31 +107,9 @@ namespace ShipConnect.Controllers
                 "Profile updated successfully."
             );
         }
-        //get all startups
-        //[Authorize]
-        [HttpGet("All")]
-        public async Task<GeneralResponse<object>> GetAllStartups([FromQuery] int pageIndex = 1,
-    [FromQuery] int pageSize = 10)
-        {
-            return GeneralResponse<object>.SuccessResponse(
-                "Success",
-                await _mediator.Send(new GetAllStartupsQuery {
-                    PageIndex = pageIndex,
-                    PageSize = pageSize
-                })
-            );
-        }
-        //get count of startups
-        [Authorize]
-        [HttpGet("Count")]
-        public async Task<GeneralResponse<int>> GetCountOfStartups()
-        {
-            return GeneralResponse<int>.SuccessResponse("Success", await _mediator.Send(new GetCountOfStartupsQuery())) ;
-        }
-
-
 
         //get my startup profile
+        [Authorize(Roles = "Startup")]
         [HttpGet("me")]
         public async Task<GeneralResponse<GetStartupByIdDTO>> GetMyStartupProfile(CancellationToken cancellationToken)
         {
@@ -123,6 +133,8 @@ namespace ShipConnect.Controllers
 
             return GeneralResponse<GetStartupByIdDTO>.SuccessResponse("Profile loaded", dto);
         }
+    
+        #endregion
 
     }
 }

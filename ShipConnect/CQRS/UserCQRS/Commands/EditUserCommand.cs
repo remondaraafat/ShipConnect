@@ -8,6 +8,12 @@ namespace ShipConnect.CQRS.UserCQRS.Commands
     {
         public string Id { get; set; }
         public EditUserDTO DTO { get; set; }
+
+        public EditUserCommand(string userId, EditUserDTO dto)
+        {
+            this.Id = userId;
+            this.DTO = dto;            
+        }
     }
     public class EditUserCommandHandler : IRequestHandler<EditUserCommand, IdentityResult>
     {
@@ -16,19 +22,17 @@ namespace ShipConnect.CQRS.UserCQRS.Commands
 
         public async Task<IdentityResult> Handle(EditUserCommand request, CancellationToken cancellationToken)
         {
-
             ApplicationUser user = await _unitOfWork.ApplicationUserRepository.GetFirstOrDefaultAsync(u => u.Id == request.Id);
-            if (user == null) return IdentityResult.Failed(new IdentityError { Description = "User not found", Code = "UserNotFound" });
-
+            if (user == null)
+                return IdentityResult.Failed(new IdentityError { Description = "User not found", Code = "UserNotFound" });
 
             user.PhoneNumber = request.DTO.Phone;
             user.Email = request.DTO.Email;
             user.Name = request.DTO.StartupName;
             user.ProfileImageUrl = request.DTO.ProfileImageUrl;
 
-
-
             await _unitOfWork.SaveAsync();
+
             return IdentityResult.Success;
         }
     }

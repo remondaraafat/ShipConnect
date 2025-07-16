@@ -42,8 +42,8 @@ namespace ShipConnect.DTOs.ShipmentDTOs
         [Required(ErrorMessage = "*")]
         public ShippingScope ShippingScope { get; set; }
 
-        [MaxLength(100)]
-        public string? Packaging { get; set; }
+        //[MaxLength(100)]
+        //public string? Packaging { get; set; }
         
         [MaxLength(500)]
         public string? Description { get; set; }

@@ -5,7 +5,6 @@ namespace ShipConnect.DTOs.ShipmentDTOs
     public class GetShipmentByIdDTO: ShipmentDetailsDTO
     {
         public string? SenderPhone { get; set; }
-        public int OffersCount { get; set; }
         public DateTime? ActualSentDate { get; set; }//تاريخ الارسال الفعلي
         public DateTime? ActualDelivery { get; set; }//تاريخ التسليم الفعلي
         public int offerId { get; set; }

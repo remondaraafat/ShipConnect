@@ -684,9 +684,6 @@ namespace ShipConnect.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Packaging")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("PackagingOptions")
                         .HasColumnType("int");
 

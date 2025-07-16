@@ -7,19 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="CQRS\Register\Queries\**" />
     <Compile Remove="CQRS\Tracking\**" />
     <Compile Remove="DTOs\ReceivderDTOs\**" />
     <Compile Remove="DTOs\TrackingDTOs\**" />
-    <Content Remove="CQRS\Register\Queries\**" />
     <Content Remove="CQRS\Tracking\**" />
     <Content Remove="DTOs\ReceivderDTOs\**" />
     <Content Remove="DTOs\TrackingDTOs\**" />
-    <EmbeddedResource Remove="CQRS\Register\Queries\**" />
     <EmbeddedResource Remove="CQRS\Tracking\**" />
     <EmbeddedResource Remove="DTOs\ReceivderDTOs\**" />
     <EmbeddedResource Remove="DTOs\TrackingDTOs\**" />
-    <None Remove="CQRS\Register\Queries\**" />
     <None Remove="CQRS\Tracking\**" />
     <None Remove="DTOs\ReceivderDTOs\**" />
     <None Remove="DTOs\TrackingDTOs\**" />

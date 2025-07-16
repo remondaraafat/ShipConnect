@@ -58,7 +58,7 @@ namespace ShipConnect.CQRS.Shipments.Commands
                 DestinationAddress = request.DTO.DestinationAddress,
                 TransportType = request.DTO.TransportType,
                 ShippingScope = request.DTO.ShippingScope,
-                Packaging = request.DTO.Packaging,
+                //Packaging = request.DTO.Packaging,
                 Description = request.DTO.Description,
                 ShipmentType = request.DTO.ShipmentType,
                 RequestedPickupDate = request.DTO.RequestedPickupDate,

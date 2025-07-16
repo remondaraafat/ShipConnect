@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using ShipConnect.Helpers;
 using ShipConnect.UnitOfWorkContract;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace ShipConnect.ShippingCompanies.Commands
 {
@@ -23,11 +24,14 @@ namespace ShipConnect.ShippingCompanies.Commands
         {
             var entity = await _unitOfWork.ShippingCompanyRepository.GetByIdAsync(request.Id);
             if (entity == null)
-            {
                 return GeneralResponse<bool>.FailResponse("Shipping company not found");
-            }
 
-            await _unitOfWork.ShippingCompanyRepository.DeleteAsync(x => x.Id == request.Id);
+            if(!entity.User.IsApproved)
+                return GeneralResponse<bool>.FailResponse("Company is already deleted");
+
+            _unitOfWork.ShippingCompanyRepository.Update(entity);
+            entity.User.IsApproved = false;
+
             await _unitOfWork.SaveAsync();
 
             return GeneralResponse<bool>.SuccessResponse("Shipping company deleted successfully", true);

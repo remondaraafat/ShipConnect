@@ -7,8 +7,14 @@ namespace ShipConnect.ShippingCompanies.Querys
 {
     public class GetShippingCompanyByIdQuery : IRequest<GeneralResponse<ShippingCompanyDto>>
     {
-        public int Id { get; set; }
-        public GetShippingCompanyByIdQuery(int id) => Id = id;
+        public int? CompanyId { get; }
+        public string? UserId { get; }
+
+        public GetShippingCompanyByIdQuery(int? companyId, string? userId)
+        {
+            CompanyId = companyId;
+            UserId = userId;
+        }
     }
 
     public class GetShippingCompanyByIdHandler : IRequestHandler<GetShippingCompanyByIdQuery, GeneralResponse<ShippingCompanyDto>>
@@ -22,28 +28,38 @@ namespace ShipConnect.ShippingCompanies.Querys
 
         public async Task<GeneralResponse<ShippingCompanyDto>> Handle(GetShippingCompanyByIdQuery request, CancellationToken cancellationToken)
         {
-            var entity = await _unitOfWork.ShippingCompanyRepository.GetByIdAsync(request.Id);
+            var query = _unitOfWork.ShippingCompanyRepository.GetAllAsync();
 
-            if (entity == null)
-                return GeneralResponse<ShippingCompanyDto>.FailResponse("Shipping company not found");
+            if (request.CompanyId != null)
+                query = query.Where(s => s.Id == request.CompanyId);
 
-            var dto = new ShippingCompanyDto
+            else if (!string.IsNullOrEmpty(request.UserId))
+                query = query.Where(s => s.UserId == request.UserId);
+
+            else
+                return GeneralResponse<ShippingCompanyDto>.FailResponse("No identifier provided");
+
+
+            var data = await query.Select(s=> new ShippingCompanyDto
             {
-                Id = entity.Id,
-                CompanyName = entity.CompanyName,
-                Description = entity.Description,
-                //City = entity.City,
-                Address = entity.Address,
-                Phone = entity.Phone,
-                Website = entity.Website,
-                LicenseNumber = entity.LicenseNumber,
-                UserId = entity.UserId,
-                TransportType = entity.TransportType,
-                ShippingScope = entity.ShippingScope,
-                TaxId = entity.TaxId
-            };
+                Id = s.Id,
+                Address= s.Address ?? "N/A",
+                CompanyName = s.CompanyName,
+                Description = s.Description ?? "N/A",
+                Email = s.User.Email ?? "N/A",
+                Phone = s.Phone ?? "N/A",    
+                ProfileImageUrl = s.User.ProfileImageUrl,
+                LicenseNumber = s.LicenseNumber ?? "N/A",
+                ShippingScope = s.ShippingScope,
+                TransportType = s.TransportType,
+                TaxId = s.TaxId ?? "N/A",
+                Website = s.Website ?? "N/A"
+            }).FirstOrDefaultAsync(cancellationToken);
 
-            return GeneralResponse<ShippingCompanyDto>.SuccessResponse("Shipping company retrieved successfully", dto);
+            if (data == null)
+                return GeneralResponse<ShippingCompanyDto>.FailResponse("company not Found");
+
+            return GeneralResponse<ShippingCompanyDto>.SuccessResponse("Shipping Company data retrieved successfully", data);
         }
     }
 }

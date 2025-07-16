@@ -1,10 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using MediatR;
-using Microsoft.AspNetCore.Identity;
-using ShipConnect.Helpers;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
+using ShipConnect.CQRS.Notification.Commands;
+using ShipConnect.DTOs.NotificationDTO;
+using ShipConnect.Hubs;
 using ShipConnect.Models;
-using ShipConnect.UnitOfWorkContract;
-using static ShipConnect.Enums.Enums;
 
 namespace ShipConnect.CQRS.Register.Commands
 {
@@ -31,55 +30,57 @@ namespace ShipConnect.CQRS.Register.Commands
         private readonly UserManager<ApplicationUser> UserManager;
         private readonly IUnitOfWork UnitOfWork;
         private readonly IEmailService _emailService;
+        private readonly IMediator mediator;
+        private readonly IHubContext<NotificationHub> hubContext;
 
-        public RegisterAsShippingCompanyCommandHandler(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, IEmailService emailService)
+        public RegisterAsShippingCompanyCommandHandler(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, IEmailService emailService,IMediator mediator, IHubContext<NotificationHub> hubContext)
         {
             this.UserManager = userManager;
             this.UnitOfWork = unitOfWork;
             this._emailService = emailService;
-
+            this.mediator = mediator;
+            this.hubContext = hubContext;
         }
 
         public async Task<GeneralResponse<List<string>>> Handle(RegisterAsShippingCompanyCommand request, CancellationToken cancellationToken)
         {
             if(!request.AcceptTerms)
-            {
-                return GeneralResponse<List<string>>.FailResponse("You must accept the terms and conditions to register.");
-            }
+                return GeneralResponse<List<string>>.FailResponse("You must accept the terms and conditions.");
+
             var existEmail = await UserManager.FindByEmailAsync(request.Email);
             if (existEmail != null)
-            {
                 return GeneralResponse<List<string>>.FailResponse("Email already exists", new List<string> { "This email is already in use." });
-            }
 
             var user = new ApplicationUser
             {
                 UserName = request.Email,
                 Email = request.Email,
                 PhoneNumber = request.Phone,
-                Name=request.CompanyName
+                Name=request.CompanyName,
+                IsApproved = false
             };
             
-            IdentityResult result= await UserManager.CreateAsync(user,request.Password);
+            //create account
+            var result= await UserManager.CreateAsync(user,request.Password);
             if (!result.Succeeded)
             {
                 List<string> errorList = result.Errors.Select(e => e.Description).ToList();
                 return GeneralResponse<List<string>>.FailResponse("Failed to create user", errorList);
             }
 
-            IdentityResult role = await UserManager.AddToRoleAsync(user, UserRole.ShippingCompany.ToString());
+            //add role
+            var role = await UserManager.AddToRoleAsync(user, UserRole.ShippingCompany.ToString());
             if(!role.Succeeded)
             {
-                await UserManager.DeleteAsync(user);
+                await UserManager.DeleteAsync(user);//rollback
                 List<string> roleErrors = role.Errors.Select(e=>e.Description).ToList();
                 return GeneralResponse<List<string>>.FailResponse("Failed to assign role", roleErrors);
             }
 
-            var shippingCompany = new ShippingCompany
+            var company = new ShippingCompany
             {
                 CompanyName = request.CompanyName,
                 Address = request.Address,
-                //City = request.City,
                 Phone = request.Phone,
                 Description = request.Description,
                 UserId = user.Id,
@@ -90,40 +91,42 @@ namespace ShipConnect.CQRS.Register.Commands
                 LicenseNumber = request.LicenseNumber,
             };
 
-            await UnitOfWork.ShippingCompanyRepository.AddAsync(shippingCompany);
+            await UnitOfWork.ShippingCompanyRepository.AddAsync(company);
             await UnitOfWork.SaveAsync();
 
+            var admins = await UserManager.GetUsersInRoleAsync("Admin");
+
+            var notification = new CreateNotificationDTO
+            {
+                Title = "New Shipping‑Company Account Requires Approval",
+                Message = $"{request.CompanyName} just signed up as a shipping company and is waiting for your approval.",
+                RecipientIds = admins.Select(u=>u.Id),
+                NotificationType = NotificationType.General,
+            };
+
+            // 1) الرسالة تُحفظ في جدول Notifications
+            await mediator.Send(new CreateNotificationCommand(notification), cancellationToken);
+
+            // 2) تُرسل فورًا عبر SignalR
+            await hubContext.Clients.Users(admins.Select(u=>u.Id)).SendAsync("NewApprovalRequest", notification,cancellationToken);
+
+            //email to user
             await _emailService.SendEmailAsync(
             toEmail: request.Email,
             subject: "Welcome to ShipConnect!",
                 body: $@"
-                <div style='max-width: 600px; margin: auto; font-family: Arial, sans-serif; padding: 30px; background-color: #f9f9f9; border-radius: 10px; border: 1px solid #ddd; color: #333;'>
-                    <div style='text-align: center;'>
-                        <h1 style='color: #2a7ae2; margin-bottom: 0;'>Welcome to ShipConnect! 🚀</h1>
-                        <p style='font-size: 16px; margin-top: 5px;'>Hi <strong>{request.CompanyName}</strong>,</p>
-                    </div>
-    
-                    <div style='margin-top: 30px; font-size: 15px; line-height: 1.7;'>
-                        <p>We’re excited to have you on board! Your account has been successfully created.</p>
-                        <p>Start now by exploring your dashboard, posting shipments, and receiving offers from verified shipping partners across Egypt and beyond.</p>
-        
-                        <div style='text-align: center; margin: 30px 0;'>
-                            <a href='https://shipconnect.com/login' style='background-color: #2a7ae2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;'>Login to Your Dashboard</a>
-                        </div>
-
-                        <p>If you have any questions or need help, don't hesitate to reach out to our team at 
-                            <a href='mailto:support@shipconnect.com' style='color: #2a7ae2;'>support@shipconnect.com</a>.
-                        </p>
-                    </div>
-
-                    <hr style='margin: 40px 0; border: none; border-top: 1px solid #eee;' />
-
-                    <footer style='font-size: 13px; color: #888; text-align: center;'>
-                        © {DateTime.Now.Year} ShipConnect. All rights reserved.
-                    </footer>
-                </div>"
-        );
-
+                    <div style='max-width:600px;margin:auto;font-family:Arial;padding:30px;
+                                background:#f9f9f9;border-radius:10px;border:1px solid #ddd;color:#333'>
+                        <h1 style='color:#2a7ae2;text-align:center'>Welcome to ShipConnect! 🚀</h1>
+                        <p style='font-size:16px'>Hi <strong>{request.CompanyName}</strong>,</p>
+                        <p>Your account has been created and is pending admin approval.</p>
+                        <p>We’ll notify you as soon as you’re approved.</p>
+                        <hr style='margin:30px 0;border:none;border-top:1px solid #eee'>
+                        <footer style='font-size:13px;color:#888;text-align:center'>
+                            © {DateTime.Now.Year} ShipConnect. All rights reserved.
+                        </footer>
+                    </div>"
+                );
 
             return GeneralResponse<List<string>>.SuccessResponse("User registered successfully");
         }

@@ -4,7 +4,11 @@ namespace ShipConnect.CQRS.Shipments.Queries
 {
     public class AdminShippingStatusCountQuery : IRequest<GeneralResponse<GetAllStatusCountDTO>>
     {
-        public int ShippingCompanyID { get; set; }
+        public int ShippingCompanyID { get;}
+        public AdminShippingStatusCountQuery(int shippingCompanyID)
+        {
+            shippingCompanyID = ShippingCompanyID;
+        }
     }
 
     public class AdminShippingStatusCountQueryHandler : IRequestHandler<AdminShippingStatusCountQuery, GeneralResponse<GetAllStatusCountDTO>>
