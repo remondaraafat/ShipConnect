@@ -25,12 +25,12 @@ namespace ShipConnect.ShippingCompanies.Querys
 
         public async Task<GeneralResponse<GetDataResult<List<GetAllUsersDTO>>>> Handle(GetAllShippingCompaniesQuery request, CancellationToken cancellationToken)
         {
-            int total = await _unitOfWork.ShippingCompanyRepository.CountAsync(s => s.User.IsApproved && s.User.Name != "Admin");
+            int total = await _unitOfWork.ShippingCompanyRepository.CountAsync(s => s.User.IsApproved && s.CompanyName.ToUpper() != "ADMIN");
             if (total == 0)
                 return GeneralResponse<GetDataResult<List<GetAllUsersDTO>>>.SuccessResponse("No shipping companies yet");
 
             var companies = await _unitOfWork.ShippingCompanyRepository
-                                    .GetWithFilterAsync(c=>c.User.IsApproved && c.User.Name != "Admin")
+                                    .GetWithFilterAsync(c=>c.User.IsApproved && c.CompanyName.ToUpper() != "ADMIN")
                                     .OrderByDescending(c=>c.CreatedAt)
                                     .Skip((request.PageNumber-1)*request.PageSize)
                                     .Take(request.PageSize)

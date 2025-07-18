@@ -181,12 +181,12 @@ namespace ShipConnect.Controllers
             var result = await _mediator.Send(new UpdateShipmentStatusCommand(userId, ShipmentId, Status));
             return result.Success ? Ok(result) : BadRequest(result);
         }
-        
-        #endregion
-        
-        
-        #region StartUp & Shipping Company 
 
+        #endregion
+
+
+        #region StartUp & Shipping Company 
+        [Authorize]
         [HttpGet("AllShipments")]
         public async Task<IActionResult> GetAllShipments(int pageNumber = 1, int pageSize = 10)
         {
@@ -197,7 +197,8 @@ namespace ShipConnect.Controllers
             var result = await _mediator.Send(new GetAllShipmentsQuery(userId, pageNumber, pageSize));
             return result.Success ? Ok(result) : BadRequest(result);
         }
-
+        
+        [Authorize]
         [HttpGet("filterWithCode/{code}")]
         public async Task<IActionResult> GetShipmentWithCode(string code)
         {
@@ -209,6 +210,7 @@ namespace ShipConnect.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        [Authorize]
         [HttpGet("filterWithStatus/{status:int}")]
         public async Task<IActionResult> GetShipmentsWithStatus(int status, int pageNumber = 1, int pageSize = 10)
         {
@@ -220,6 +222,7 @@ namespace ShipConnect.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        [Authorize]
         [HttpGet("StatusCount")]
         public async Task<IActionResult> StatusCount()
         {
@@ -244,39 +247,11 @@ namespace ShipConnect.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-
-        #endregion
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        #region Admin
-
-
         [Authorize(Roles = "Admin")]
         [HttpGet("Admin/ShippingCount/{shippingCompanyId:int}")]
         public async Task<IActionResult> AdminShippingStatusCount(int shippingCompanyId)
         {
-            var query = new AdminShippingStatusCountQuery
-            {
-                ShippingCompanyID = shippingCompanyId
-            };
-
-            var result = await _mediator.Send(query);
-
+            var result = await _mediator.Send(new AdminShippingStatusCountQuery(shippingCompanyId));
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -284,27 +259,15 @@ namespace ShipConnect.Controllers
         [HttpGet("Admin/StatusCount/{startUpId:int}")]
         public async Task<IActionResult> AdminStartUpStatusCount(int startUpId)
         {
-            var query = new AdminStartUpStatusCountQuery
-            {
-                StartUpID = startUpId
-            };
-
-            var result = await _mediator.Send(query);
-
+            var result = await _mediator.Send(new AdminStartUpStatusCountQuery(startUpId));
             return result.Success ? Ok(result) : BadRequest(result);
         }
-
+        
         [Authorize(Roles = "Admin")]
         [HttpGet("Admin/ShippingMethodCount/{startUpId:int}")]
         public async Task<IActionResult> AdminStartUpShippingMethodCount(int startUpId)
         {
-            var query = new AdminStartUpShippingMethodCountQuery
-            {
-                StartUpID = startUpId
-            };
-
-            var result = await _mediator.Send(query);
-
+            var result = await _mediator.Send(new AdminStartUpShippingMethodCountQuery(startUpId));
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -312,20 +275,11 @@ namespace ShipConnect.Controllers
         [HttpGet("Admin/ShippingScopeCount/{startUpId:int}")]
         public async Task<IActionResult> AdminStartUpShippingScopeCount(int startUpId)
         {
-            var query = new AdminStartUpShippingScopeCountQuery
-            {
-                StartUpID = startUpId
-            };
-
-            var result = await _mediator.Send(query);
-
+            var result = await _mediator.Send(new AdminStartUpShippingScopeCountQuery(startUpId));
             return result.Success ? Ok(result) : BadRequest(result);
         }
-
+        
         #endregion
-
-
-
+    
     }
-
 }

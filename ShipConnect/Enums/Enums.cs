@@ -45,7 +45,8 @@
             Cash,
             CreditCard,
             BankTransfer,
-            Wallet
+            Wallet,
+            PayPal
         }
 
         public enum PaymentStatus

@@ -155,6 +155,83 @@ namespace ShipConnect.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OfferId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PayPalEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PayPalOrderId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PayerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PaymentMethod")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReceiverBankAccountId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SenderBankAccountId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ShipmentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PayerId");
+
+                    b.HasIndex("ReceiverBankAccountId");
+
+                    b.HasIndex("SenderBankAccountId");
+
+                    b.HasIndex("ShipmentId");
+
+                    b.ToTable("Payments");
+                });
+
             modelBuilder.Entity("ShipConnect.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -483,70 +560,6 @@ namespace ShipConnect.Migrations
                     b.ToTable("PasswordResetCodes");
                 });
 
-            modelBuilder.Entity("ShipConnect.Models.Payment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Currency")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("OfferId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("PaymentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("PaymentMethod")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReceiverBankAccountId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SenderBankAccountId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ShipmentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReceiverBankAccountId");
-
-                    b.HasIndex("SenderBankAccountId");
-
-                    b.HasIndex("ShipmentId");
-
-                    b.ToTable("Payments");
-                });
-
             modelBuilder.Entity("ShipConnect.Models.Rating", b =>
                 {
                     b.Property<int>("Id")
@@ -670,9 +683,6 @@ namespace ShipConnect.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<string>("Packaging")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PackagingOptions")
                         .HasColumnType("int");
@@ -899,6 +909,35 @@ namespace ShipConnect.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Payment", b =>
+                {
+                    b.HasOne("ShipConnect.Models.ApplicationUser", "Payer")
+                        .WithMany()
+                        .HasForeignKey("PayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShipConnect.Models.BankAccount", "ReceiverBankAccount")
+                        .WithMany("PaymentsReceived")
+                        .HasForeignKey("ReceiverBankAccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ShipConnect.Models.BankAccount", "SenderBankAccount")
+                        .WithMany("PaymentsSent")
+                        .HasForeignKey("SenderBankAccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ShipConnect.Models.Shipment", null)
+                        .WithMany("Payments")
+                        .HasForeignKey("ShipmentId");
+
+                    b.Navigation("Payer");
+
+                    b.Navigation("ReceiverBankAccount");
+
+                    b.Navigation("SenderBankAccount");
+                });
+
             modelBuilder.Entity("ShipConnect.Models.BankAccount", b =>
                 {
                     b.HasOne("ShipConnect.Models.ApplicationUser", "User")
@@ -963,29 +1002,6 @@ namespace ShipConnect.Migrations
                     b.Navigation("Shipment");
 
                     b.Navigation("ShippingCompany");
-                });
-
-            modelBuilder.Entity("ShipConnect.Models.Payment", b =>
-                {
-                    b.HasOne("ShipConnect.Models.BankAccount", "ReceiverBankAccount")
-                        .WithMany("PaymentsReceived")
-                        .HasForeignKey("ReceiverBankAccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ShipConnect.Models.BankAccount", "SenderBankAccount")
-                        .WithMany("PaymentsSent")
-                        .HasForeignKey("SenderBankAccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ShipConnect.Models.Shipment", null)
-                        .WithMany("Payments")
-                        .HasForeignKey("ShipmentId");
-
-                    b.Navigation("ReceiverBankAccount");
-
-                    b.Navigation("SenderBankAccount");
                 });
 
             modelBuilder.Entity("ShipConnect.Models.Rating", b =>

@@ -17,8 +17,7 @@ namespace ShipConnect.CQRS.AdminProfileCQRS.Query
 
         public async Task<GetUserDTO?> Handle(GetUserByEmailQuery request, CancellationToken cancellationToken)
         {
-            var user = await _unitOfWork.ApplicationUserRepository
-                .GetFirstOrDefaultAsync(u => u.Email == request.Email);
+            var user = await _unitOfWork.ApplicationUserRepository.GetFirstOrDefaultAsync(u => u.Email == request.Email);
 
             if (user == null)
                 return null;

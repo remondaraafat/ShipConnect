@@ -24,32 +24,27 @@ namespace ShipConnect
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
             builder.Services.AddControllers();
-
             builder.Services.AddSignalR();
 
             #region DbContext
-
             builder.Services.AddDbContext<ShipConnectContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("ShipConnect"));
             });
             #endregion
 
-
             #region JWT
-            //register 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddEntityFrameworkStores<ShipConnectContext>()
-            .AddDefaultTokenProviders();
+                .AddEntityFrameworkStores<ShipConnectContext>()
+                .AddDefaultTokenProviders();
 
             builder.Services.AddAuthentication(options =>
             {
-                options.DefaultAuthenticateScheme=JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme=JwtBearerDefaults.AuthenticationScheme;//unauth
-                options.DefaultScheme=JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options =>//verified key
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
             {
                 options.SaveToken = true;
                 options.RequireHttpsMetadata = false;
@@ -62,23 +57,18 @@ namespace ShipConnect
                     ValidIssuer = builder.Configuration["JWT:IssuerIP"],
                     ValidAudience = builder.Configuration["JWT:AudienceIP"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecritKey"])),
-
-                    //notification
                     NameClaimType = ClaimTypes.NameIdentifier
                 };
-                options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+                options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
                     {
                         var accessToken = context.Request.Query["access_token"];
-
-                        // السماح باستخدام التوكن في WebSocket (SignalR)
                         var path = context.HttpContext.Request.Path;
                         if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
                         {
                             context.Token = accessToken;
                         }
-
                         return Task.CompletedTask;
                     }
                 };
@@ -88,9 +78,9 @@ namespace ShipConnect
             #region CORS
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowReactApp", policy =>
+                options.AddPolicy("AllowAngularApp", policy =>
                 {
-                    policy.WithOrigins("http://localhost:3000") // أو الدومين الفعلي لو deploy
+                    policy.WithOrigins("http://localhost:4200") // Angular dev server
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials();
@@ -100,8 +90,6 @@ namespace ShipConnect
 
             #region Swagger
             builder.Services.AddEndpointsApiExplorer();
-            //builder.Services.AddSwaggerGen();
-
             builder.Services.AddSwaggerGen(swagger =>
             {
                 swagger.SwaggerDoc("v1", new OpenApiInfo
@@ -110,6 +98,7 @@ namespace ShipConnect
                     Title = "ASP.NET 8 WEB API",
                     Description = "SHIPCONNECT PROJECT",
                 });
+
                 swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
                 {
                     Name = "Authorization",
@@ -119,6 +108,7 @@ namespace ShipConnect
                     In = ParameterLocation.Header,
                     Description = "Enter 'Bearer' [space] and then your valid token"
                 });
+
                 swagger.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     {
@@ -130,26 +120,26 @@ namespace ShipConnect
                                 Id="Bearer"
                             }
                         },
-                        new string[]{}
+                        Array.Empty<string>()
                     }
                 });
-            }
-            );
-
-
+            });
             #endregion
+
+            // App Services
             builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddScoped<INotificationRepository,NotificationRepository>();
-
+            builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+            builder.Services.AddScoped<PayPalService>();
             builder.Services.AddMediatR(options =>
-            options.RegisterServicesFromAssembly(typeof(Program).Assembly));
+                options.RegisterServicesFromAssembly(typeof(Program).Assembly)
+            );
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Middleware
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -159,15 +149,16 @@ namespace ShipConnect
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            app.UseCors("AllowReactApp");
+            app.UseCors("AllowAngularApp");
 
-            
+            app.UseAuthentication(); 
             app.UseAuthorization();
-
 
             app.MapControllers();
             app.MapHub<NotificationHub>("/notificationHub");
+
             app.Run();
         }
     }
 }
+

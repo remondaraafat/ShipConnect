@@ -29,9 +29,9 @@ namespace ShipConnect.DTOs.AccountDTOs
         [Display(Name = "Confirm Password")]
         public string ConfirmPassword { get; set; }
 
-        [Required(ErrorMessage = "*")]
-        [MaxLength(50, ErrorMessage = "City name cannot exceed 50 characters.")]
-        public string City { get; set; }
+        //[Required(ErrorMessage = "*")]
+        //[MaxLength(50, ErrorMessage = "City name cannot exceed 50 characters.")]
+        //public string City { get; set; }
 
         [Required(ErrorMessage = "*")]
         [MaxLength(300, ErrorMessage = "Address cannot exceed 300 characters.")]

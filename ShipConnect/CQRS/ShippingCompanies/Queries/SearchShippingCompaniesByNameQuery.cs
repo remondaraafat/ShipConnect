@@ -29,8 +29,7 @@ namespace ShipConnect.CQRS.ShippingCompanies.Queries
         {
            
 
-            var result = _unitOfWork.ShippingCompanyRepository
-                .GetWithFilterAsync(c => c.CompanyName.ToLower().Contains(request.Name.ToLower())).Select(c => new ShippingCompanyDto
+            var result = _unitOfWork.ShippingCompanyRepository.GetWithFilterAsync(c => c.CompanyName.ToLower().Contains(request.Name.ToLower())).Select(c => new ShippingCompanyDto
             {
                 Id = c.Id,
                 CompanyName = c.CompanyName,
@@ -41,7 +40,6 @@ namespace ShipConnect.CQRS.ShippingCompanies.Queries
                 Description = c.Description,
                 LicenseNumber = c.LicenseNumber,
                 TaxId = c.TaxId,
-                UserId = c.UserId,
                 TransportType = c.TransportType,
                 ShippingScope = c.ShippingScope
             }).ToList();

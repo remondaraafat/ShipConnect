@@ -7,10 +7,12 @@ namespace ShipConnect.CQRS.Offers.Queries
 {
     public class GetOfferStatusQuery : IRequest<GeneralResponse<OfferStatsDto>>
     {
-        public string UserId { get; }
+        public int? CompanyId { get; }
+        public string? UserId { get; }
 
-        public GetOfferStatusQuery(string userId)
+        public GetOfferStatusQuery(int? companyId, string? userId)
         {
+            CompanyId = companyId;
             UserId = userId;
         }
     }
@@ -26,25 +28,33 @@ namespace ShipConnect.CQRS.Offers.Queries
 
         public async Task<GeneralResponse<OfferStatsDto>> Handle(GetOfferStatusQuery request, CancellationToken cancellationToken)
         {
-            var company = await _unitOfWork.ShippingCompanyRepository.GetFirstOrDefaultAsync(s => s.UserId == request.UserId);
-            if (company == null)
-                return GeneralResponse<OfferStatsDto>.FailResponse("Unauthorized user");
+            var offersQry = _unitOfWork.OfferRepository.GetAllAsync();
 
-            var offers = _unitOfWork.OfferRepository.GetWithFilterAsync(o => o.ShippingCompanyId == company.Id);
+            if (request.CompanyId != null)
+                offersQry = offersQry.Where(s => s.ShippingCompanyId == request.CompanyId);
 
-            int totalCount = await offers.CountAsync(cancellationToken);
-            if (totalCount == 0)
-                return GeneralResponse<OfferStatsDto>.FailResponse("You don't have any offers");
+            else if (!string.IsNullOrEmpty(request.UserId))
+                offersQry = offersQry.Where(s => s.ShippingCompany.UserId == request.UserId);
 
+            else
+                return GeneralResponse<OfferStatsDto>.FailResponse("No identifier provided");
+            
+            var grouped = await offersQry.GroupBy(_ => 1)    // صفّ واحد
+                                         .Select(g => new
+                                         {
+                                             Total = g.Count(),
+                                             Accepted = g.Count(x => x.IsAccepted)
+                                         })
+                                         .FirstOrDefaultAsync(cancellationToken);
 
-            var acceptedOffers = await offers.CountAsync(o => o.IsAccepted, cancellationToken);
-            var rejectedOffers = totalCount - acceptedOffers;
+            if (grouped is null || grouped.Total == 0)
+                return GeneralResponse<OfferStatsDto>.FailResponse("No offers found");
 
             var dto = new OfferStatsDto
             {
-                Accepted = acceptedOffers,
-                Rejected = rejectedOffers,
-                TotalCount = totalCount
+                TotalCount = grouped.Total,
+                Accepted = grouped.Accepted,
+                Rejected = grouped.Total - grouped.Accepted
             };
 
             return GeneralResponse<OfferStatsDto>.SuccessResponse("Offers status count retrieved successfully", dto);

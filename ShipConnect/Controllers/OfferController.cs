@@ -1,12 +1,15 @@
-﻿using System.Security.Claims;
+﻿using System.ComponentModel.Design;
+using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ShipConnect.CQRS.Offers.Commands;
 using ShipConnect.CQRS.Offers.Queries;
 using ShipConnect.CQRS.Shipments.Queries;
+using ShipConnect.CQRS.StartUps.Queries;
 using ShipConnect.DTOs.OfferDTOs;
 using ShipConnect.Helpers;
+using ShipConnect.Models;
 
 namespace ShipConnect.Controllers
 {
@@ -30,8 +33,8 @@ namespace ShipConnect.Controllers
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId is null)
                 return Unauthorized();
-
-            var response = await _mediator.Send(new GetOfferStatusQuery(userId));
+            
+            var response = await _mediator.Send(new GetOfferStatusQuery( null, userId));
             return response.Success ? Ok(response) : BadRequest(response);
         }
 
@@ -136,6 +139,13 @@ namespace ShipConnect.Controllers
             return response.Success ? Ok(response) : BadRequest(response);
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpGet("companyOffers/{companyId:int}")]
+        public async Task<IActionResult> AdminCompanyOfferStatsCount(int companyId)
+        {
+            var response = await _mediator.Send(new GetOfferStatusQuery(companyId, null));
+            return response.Success ? Ok(response) : NotFound(response);
+        }
         #endregion
 
 

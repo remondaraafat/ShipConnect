@@ -28,12 +28,7 @@ namespace ShipConnect.Controllers
             return response.Success ? Ok(response) : BadRequest(response);
         }
 
-        #endregion
-
-
-
-
-        //get
+        [Authorize(Roles = "Admin")]
         [HttpGet("me")]
         public async Task<GeneralResponse<GetUserDTO>> GetMyProfile(CancellationToken cancellationToken)
         {
@@ -48,34 +43,27 @@ namespace ShipConnect.Controllers
 
             return GeneralResponse<GetUserDTO>.SuccessResponse("Profile loaded successfully.", userDto);
         }
-        //edit
+
+        [Authorize(Roles = "Admin")]
         [HttpPut]
-        public async Task<GeneralResponse<object>> EditMyProfile(
-        [FromBody] EditUserDTO dto,
-        CancellationToken cancellationToken)
+        public async Task<GeneralResponse<object>> EditMyProfile([FromBody] EditUserDTO dto, CancellationToken cancellationToken)
         {
-            // جلب البريد من التوكن
             string Id = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(Id))
-            {
                 return GeneralResponse<object>.FailResponse("Id not found in token.");
-            }
 
-            // استدعاء الأمر
-            var result = await _mediator.Send(new EditUserCommand
-            {
-                Id = Id,
-                DTO = dto
-            }, cancellationToken);
+            var result = await _mediator.Send(new EditUserCommand(Id,dto), cancellationToken);
 
             if (!result.Succeeded)
             {
-                // تجهيز قائمة الأخطاء إن وُجدت
                 var errors = result.Errors.Select(e => e.Description);
                 return GeneralResponse<object>.FailResponse("Failed to update profile: " + string.Join("; ", errors));
             }
 
             return GeneralResponse<object>.SuccessResponse("Profile updated successfully.");
         }
+
+        #endregion
+
     }
 }

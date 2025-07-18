@@ -10,9 +10,10 @@
         {
             _unitOfWork = unitOfWork;
         }
+
         public async Task<int> Handle(GetCountOfStartupsQuery request, CancellationToken cancellationToken)
         {
-            return await _unitOfWork.StartUpRepository.CountAsync();
+            return await _unitOfWork.StartUpRepository.CountAsync(s=>s.User.IsApproved && s.CompanyName.ToUpper()!="ADMIN");
         }
     }
 }

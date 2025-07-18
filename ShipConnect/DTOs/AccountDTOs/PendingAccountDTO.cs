@@ -2,7 +2,8 @@
 {
     public class PendingAccountDTO
     {
-        public string UserId { get; set; }
+        public int Id { get; set; }
+        public string UerId { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
         public string ProfileImageUrl { get; set; }
