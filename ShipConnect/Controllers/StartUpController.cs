@@ -45,7 +45,7 @@ namespace ShipConnect.Controllers
             );
         }
         
-        [Authorize("Admin")]
+        [Authorize(Roles ="Admin")]
         [HttpGet("StartUpProfile/{startUpId:int}")] 
         public async Task<IActionResult> GetStartupProfileById(int startUpId,CancellationToken cancellationToken)
         {

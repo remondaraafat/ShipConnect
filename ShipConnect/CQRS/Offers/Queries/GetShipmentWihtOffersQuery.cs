@@ -26,20 +26,21 @@ namespace ShipConnect.CQRS.Offers.Queries
             if (startUp == null)
                 return GeneralResponse<List<ShipmentWithOffersDTO>>.FailResponse("Unauthorized user");
 
-            var shipments = _unitOfWork.ShipmentRepository
-                                    .GetWithFilterAsync(s=>s.StartupId==startUp.Id && !s.Offers.Any(o=>o.IsAccepted))
+            var shipments =await  _unitOfWork.ShipmentRepository.GetAllAsync()
+                                    .Where(s=>s.StartupId==startUp.Id && !s.Offers.Any(o=>o.IsAccepted))
                                     .Include(s=>s.Offers)
                                     .ThenInclude(s=>s.ShippingCompany)
                                     .OrderByDescending(s=>s.CreatedAt)
-                                    .ToList();
+                                    .ToListAsync();
 
-            var ratingDict = ( _unitOfWork.RatingRepository
-                                    .GetAllAsync()
-                                    .ToList())     
-                             .GroupBy(r => r.ShippingCompany.Id)       
-                             .ToDictionary(
-                                 g => g.Key,
-                                 g => g.Average(r => r.Score));
+            var ratings = _unitOfWork.RatingRepository.GetAllAsync();
+
+            var ratingDict = ratings
+                .GroupBy(r => r.ShippingCompany.Id)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Average(r => r.Score));
+
 
             var result = shipments.Select(s => new ShipmentWithOffersDTO
             {
