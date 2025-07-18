@@ -20,11 +20,20 @@ namespace ShipConnect.CQRS.UserCQRS.Commands
             ApplicationUser user = await _unitOfWork.ApplicationUserRepository.GetFirstOrDefaultAsync(u => u.Id == request.Id);
             if (user == null) return IdentityResult.Failed(new IdentityError { Description = "User not found", Code = "UserNotFound" });
 
+            //image handling
+            if (request.DTO.ProfileImageFile != null)
+            {
+                var fileName = await FileHelper.UploadFileAsync(request.DTO.ProfileImageFile);
+                if (fileName.Contains("MB") || fileName.Contains("Null"))
+                    return IdentityResult.Failed(new IdentityError { Description = fileName });
+
+                user.ProfileImageUrl = Path.Combine("images", fileName);
+            }
 
             user.PhoneNumber = request.DTO.Phone;
             user.Email = request.DTO.Email;
             user.Name = request.DTO.StartupName;
-            user.ProfileImageUrl = request.DTO.ProfileImageUrl;
+            //user.ProfileImageUrl = request.DTO.ProfileImageFile;
 
 
 

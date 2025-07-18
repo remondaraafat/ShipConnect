@@ -15,6 +15,6 @@ namespace ShipConnect.DTOs.UserDTOs
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "Invalid email address format.")]
         public string Email { get; set; }
-        public string ProfileImageUrl { get; set; }
+        public IFormFile ProfileImageFile { get; set; }
     }
 }

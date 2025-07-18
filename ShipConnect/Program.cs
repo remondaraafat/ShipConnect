@@ -157,6 +157,7 @@ namespace ShipConnect
             }
 
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
             app.UseCors("AllowReactApp");
 
