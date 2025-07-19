@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Identity;
 using ShipConnect.DTOs.ShippingCompanies;
 using ShipConnect.Helpers;
 using ShipConnect.UnitOfWorkContract;
@@ -32,7 +33,14 @@ namespace ShipConnect.ShippingCompanies.Commands
 
             if (company == null)
                 return GeneralResponse<ShippingCompanyDto>.FailResponse("Shipping company not found");
+            if (request.Dto.ProfileImageFile != null)
+            {
+                var fileName = await FileHelper.UploadFileAsync(request.Dto.ProfileImageFile);
+                if (fileName.Contains("MB"))
+                    return GeneralResponse<ShippingCompanyDto>.FailResponse("Maximum size can be 5 MB");
 
+                company.User.ProfileImageUrl = Path.Combine("images", fileName);
+            }
             company.CompanyName = request.Dto.CompanyName;
             company.Description = request.Dto.Description;
             company.Address = request.Dto.Address;

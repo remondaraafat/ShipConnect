@@ -30,7 +30,7 @@ namespace ShipConnect.CQRS.UserCQRS.Commands
             if (request.DTO.ProfileImageFile != null)
             {
                 var fileName = await FileHelper.UploadFileAsync(request.DTO.ProfileImageFile);
-                if (fileName.Contains("MB") || fileName.Contains("Null"))
+                if (fileName.Contains("MB") )
                     return IdentityResult.Failed(new IdentityError { Description = fileName });
 
                 user.ProfileImageUrl = Path.Combine("images", fileName);
