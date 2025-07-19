@@ -33,7 +33,7 @@ namespace ShipConnect.Controllers
         [Authorize(Roles = "Admin")]
         [HttpGet("All")]
         public async Task<GeneralResponse<object>> GetAllStartups([FromQuery] int pageIndex = 1,
-    [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10)
         {
             return GeneralResponse<object>.SuccessResponse(
                 "Success",

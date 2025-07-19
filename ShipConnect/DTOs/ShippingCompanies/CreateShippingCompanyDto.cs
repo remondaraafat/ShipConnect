@@ -16,6 +16,7 @@ namespace ShipConnect.DTOs.ShippingCompanies
         public TransportType TransportType { get; set; }
         public ShippingScope ShippingScope { get; set; }
         public string? TaxId { get; set; }
+        public IFormFile ProfileImageFile { get; set; }
     }
 
 }

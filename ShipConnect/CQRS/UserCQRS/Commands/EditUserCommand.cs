@@ -35,9 +35,12 @@ namespace ShipConnect.CQRS.UserCQRS.Commands
 
                 user.ProfileImageUrl = Path.Combine("images", fileName);
             }
+            user.Name = request.DTO.StartupName;
+            user.Email = request.DTO.Email;
+            user.PhoneNumber = request.DTO.Phone;
 
-           
-            
+
+
 
             await _unitOfWork.SaveAsync();
 
