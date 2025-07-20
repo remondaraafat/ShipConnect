@@ -53,7 +53,10 @@ namespace ShipConnect.CQRS.Offers.Queries
                     Notes = o.Notes,
                     CompanyRating = ratingDict.TryGetValue(o.ShippingCompany.Id, out var avg) // ← نفس المفتاح
                                               ? avg
-                                              : 0
+                                              : 0,
+                    CompanyName = o.ShippingCompany.CompanyName
+                    
+
                 }).ToList()
             }).ToList();
 
